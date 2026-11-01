@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Win Go Pro - Official 2% Commission Lottery Platform</title>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --wingo-red: #ef4444;
+            --wingo-green: #10b981;
+            --wingo-violet: #8b5cf6;
+            --wingo-orange: #f59e0b;
+            --wingo-blue: #3b82f6;
+            --bg-light: #f4f6fb;
+            --card-white: #ffffff;
+            --border-soft: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --primary-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%);
+            --gold-gradient: linear-gradient(135deg, #fbc02d, #f59e0b);
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            --radius-xl: 20px;
+            --radius-lg: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background-color: #cbd5e1; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+
+        .wingo-app-wrapper { width: 100%; max-width: 480px; min-height: 100vh; background-color: var(--bg-light); position: relative; box-shadow: 0 15px 45px rgba(0,0,0,0.18); overflow-x: hidden; padding-bottom: 45px; }
+
+        /* Top Header */
+        .wingo-navbar { background: var(--primary-gradient); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(225, 29, 72, 0.3); }
+        .nav-back-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.22); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; color: #fff; transition: transform 0.15s; }
+        .nav-back-circle:active { transform: scale(0.92); }
+        .wingo-nav-title { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+        .nav-right-actions { display: flex; align-items: center; gap: 10px; }
+        .header-icon-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; color: #fff; }
+
+        /* Elevated Balance Card */
+        .wingo-balance-card { background: var(--card-white); margin: 14px; border-radius: var(--radius-xl); padding: 16px 18px; box-shadow: var(--card-shadow); border: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+        .bal-left-box { display: flex; flex-direction: column; gap: 3px; }
+        .bal-label-row { font-size: 12px; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .bal-amount-val { font-size: 24px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
+        .bal-amount-val span { color: var(--wingo-green); }
+        .btn-bal-refresh { color: var(--text-muted); cursor: pointer; font-size: 13px; transition: transform 0.35s ease; }
+        .btn-bal-refresh:active { transform: rotate(180deg); }
+        .bal-right-actions { display: flex; gap: 8px; }
+        .btn-balance-action { border: none; padding: 7px 14px; border-radius: 25px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: transform 0.15s; }
+        .btn-balance-action:active { transform: scale(0.96); }
+        .btn-action-deposit { background: var(--gold-gradient); color: #111; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+        .btn-action-withdraw { background: #f1f5f9; color: var(--text-dark); border: 1px solid #cbd5e1; }
+
+        /* AI Prediction Radar Strip */
+        .ai-radar-box { margin: 0 14px 12px 14px; background: #ffffff; border: 1.5px solid #fed7aa; border-radius: 14px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.1); }
+        .ai-radar-left { display: flex; align-items: center; gap: 10px; }
+        .ai-radar-icon { width: 34px; height: 34px; border-radius: 50%; background: #fff7ed; color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 1px solid #ffedd5; }
+        .ai-radar-meta h5 { font-size: 12.5px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+        .ai-radar-meta p { font-size: 10px; color: #64748b; margin-top: 1px; }
+        .ai-radar-right { text-align: right; }
+        .ai-pred-pill { background: #ea580c; color: #fff; font-size: 10.5px; font-weight: 900; padding: 2px 9px; border-radius: 20px; display: inline-block; }
+        .ai-pred-conf { font-size: 9.5px; color: #16a34a; font-weight: 800; margin-top: 2px; }
+
+        /* Independent Market Mode Tabs */
+        .market-tabs-wrapper { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 14px 12px 14px; }
+        .market-tab-card { background: var(--card-white); border: 1.5px solid var(--border-soft); border-radius: var(--radius-lg); padding: 10px 4px; text-align: center; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .market-tab-card.active { background: var(--primary-gradient); border-color: #e11d48; box-shadow: 0 6px 18px rgba(225, 29, 72, 0.35); transform: translateY(-2px); }
+        .market-tab-card i { font-size: 16px; color: #f59e0b; margin-bottom: 4px; display: block; }
+        .market-tab-card.active i { color: #ffffff; }
+        .market-tab-card span { font-size: 10.5px; font-weight: 800; color: var(--text-muted); display: block; }
+        .market-tab-card.active span { color: #ffffff; }
+
+        /* Stage Display Card */
+        .stage-banner-card { background: linear-gradient(135deg, #ffffff 0%, #fff5f7 100%); margin: 0 14px 12px 14px; border-radius: 18px; padding: 14px 16px; border: 1.5px solid #fecdd3; box-shadow: var(--card-shadow); display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .stage-left-info { display: flex; flex-direction: column; gap: 3px; }
+        .stage-rule-link { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: #e11d48; font-weight: 700; cursor: pointer; }
+        .stage-market-tag { font-size: 10.5px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-top: 2px; }
+        .stage-period-number { font-size: 18px; font-weight: 900; color: var(--text-dark); letter-spacing: 0.5px; }
+
+        .stage-right-clock { text-align: right; }
+        .stage-clock-heading { font-size: 9.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px; }
+        .countdown-boxes-row { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+        .flip-clock-box { background: #0f172a; border-radius: 7px; font-size: 19px; font-weight: 900; color: #ffffff; padding: 3px 7px; min-width: 26px; text-align: center; border: 1px solid #334155; }
+        .flip-clock-colon { font-size: 17px; font-weight: 900; color: var(--text-dark); }
+
+        /* Main Betting Station */
+        .betting-station-card { background: var(--card-white); margin: 0 14px 14px 14px; border-radius: 20px; padding: 16px 14px; border: 1px solid var(--border-soft); box-shadow: var(--card-shadow); position: relative; }
+
+        /* 3 Primary Colors */
+        .colors-button-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+        .btn-bet-color { border: none; border-radius: 12px; padding: 12px 6px; color: #fff; font-size: 14px; font-weight: 900; cursor: pointer; transition: transform 0.15s; display: flex; flex-direction: column; align-items: center; gap: 2px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+        .btn-bet-color:active { transform: scale(0.96); }
+        .btn-color-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .btn-color-violet { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
+        .btn-color-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .bet-mult-label { font-size: 10px; font-weight: 700; opacity: 0.95; }
+
+        /* 0-9 Circular Numbers Grid */
+        .numbers-circular-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 14px; }
+        .num-circle-btn { aspect-ratio: 1; border-radius: 50%; border: none; font-size: 18px; font-weight: 900; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.12); transition: transform 0.15s; position: relative; }
+        .num-circle-btn:active { transform: scale(0.92); }
+        .num-mult-tag { font-size: 8.5px; font-weight: 800; position: absolute; bottom: 3px; opacity: 0.9; }
+
+        .num-ball-green { background: radial-gradient(circle at 30% 30%, #34d399, #059669); }
+        .num-ball-red { background: radial-gradient(circle at 30% 30%, #f87171, #dc2626); }
+        .num-ball-zero { background: linear-gradient(135deg, #ef4444 50%, #9333ea 50%); }
+        .num-ball-five { background: linear-gradient(135deg, #10b981 50%, #9333ea 50%); }
+
+        /* Multiplier Chips Bar */
+        .multiplier-pills-bar { display: flex; justify-content: space-between; gap: 5px; margin-bottom: 14px; }
+        .mult-pill-chip { flex: 1; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 6px 0; text-align: center; color: var(--text-dark); font-size: 10.5px; font-weight: 800; cursor: pointer; }
+        .mult-pill-chip.active { background: var(--primary-gradient); color: #fff; border-color: #e11d48; }
+
+        /* Big / Small Row */
+        .big-small-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-big-small-opt { border: none; padding: 11px; border-radius: 25px; color: #fff; font-size: 14px; font-weight: 900; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-big-small-opt:active { transform: scale(0.97); }
+        .btn-opt-big { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .btn-opt-small { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+
+        /* 5-SECOND LOCKED COUNTDOWN OVERLAY */
+        .betting-lock-curtain { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-radius: 20px; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 60; overflow: hidden; }
+        .lock-pulse-orb { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, rgba(244, 63, 94, 0) 70%); display: flex; align-items: center; justify-content: center; animation: orbPulse 1s infinite alternate; }
+        @keyframes orbPulse { 0% { transform: scale(0.95); } 100% { transform: scale(1.1); } }
+        .lock-giant-number { font-size: 75px; font-weight: 900; color: #e11d48; line-height: 1; }
+        .lock-status-badge { margin-top: 8px; background: #ffffff; border: 1.5px solid #fecdd3; padding: 5px 14px; border-radius: 20px; display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800; color: #be123c; }
+
+        /* History Tabs */
+        .history-tabs-container { display: flex; background: var(--card-white); margin: 0 14px 10px 14px; border-radius: var(--radius-lg); padding: 4px; border: 1px solid var(--border-soft); }
+        .history-nav-tab { flex: 1; text-align: center; padding: 8px 4px; font-size: 11.5px; font-weight: 800; color: var(--text-muted); cursor: pointer; border-radius: 8px; }
+        .history-nav-tab.active { background: #f8fafc; color: #0f172a; font-weight: 900; border: 1px solid #e2e8f0; }
+
+        /* Data Display Section */
+        .history-display-sheet { margin: 0 14px; background: var(--card-white); border-radius: 18px; padding: 14px; border: 1px solid var(--border-soft); box-shadow: var(--card-shadow); }
+        .wingo-data-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 11.5px; }
+        .wingo-data-table th { background: #f8fafc; color: var(--text-muted); font-weight: 800; padding: 8px 4px; border-bottom: 1.5px solid var(--border-soft); font-size: 10.5px; text-transform: uppercase; }
+        .wingo-data-table td { padding: 9px 4px; border-bottom: 1px solid #f1f5f9; color: var(--text-dark); font-weight: 700; vertical-align: middle; }
+
+        .result-colored-bubble { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 11px; }
+        .bubble-green { background: #10b981; }
+        .bubble-red { background: #ef4444; }
+        .bubble-zero { background: linear-gradient(135deg, #ef4444 50%, #8b5cf6 50%); }
+        .bubble-five { background: linear-gradient(135deg, #10b981 50%, #8b5cf6 50%); }
+
+        .pill-size-tag { padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .pill-size-big { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+        .pill-size-small { background: rgba(59, 130, 246, 0.15); color: #2563eb; }
+
+        /* My Bets Card Node */
+        .my-bet-card-node { background: #ffffff; border: 1.5px solid #edf2f7; border-radius: 14px; padding: 12px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 6px; }
+        .bet-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; }
+        .bet-card-period { font-size: 11.5px; font-weight: 800; color: #334155; }
+        .bet-badge-status { font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; }
+        .status-win { background: #dcfce7; color: #15803d; }
+        .status-loss { background: #fee2e2; color: #b91c1c; }
+        .status-waiting { background: #fef3c7; color: #b45309; }
+        .bet-card-row { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: #64748b; }
+        .bet-card-row strong { color: #0f172a; }
+
+        /* ======================================================== */
+        /* COMPACT MOBILE-OPTIMIZED BETTING DRAWER (NO SCROLLING)   */
+        /* ======================================================== */
+        .modal-bottom-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 10000;
+        }
+        .drawer-sheet-body {
+            background: #ffffff;
+            border-top-left-radius: 22px;
+            border-top-right-radius: 22px;
+            width: 100%;
+            max-width: 480px;
+            padding: 14px 16px;
+            color: var(--text-dark);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            animation: drawerSlideUp 0.22s ease-out;
+        }
+        @keyframes drawerSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .drawer-target-banner { padding: 9px 12px; border-radius: 12px; text-align: center; font-size: 14.5px; font-weight: 900; color: #fff; margin-bottom: 10px; }
+        .drawer-section-title { font-size: 11.5px; color: var(--text-muted); font-weight: 800; margin-bottom: 6px; }
+        .drawer-chips-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+        .drawer-chip-btn { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 7px 0; text-align: center; font-size: 12.5px; font-weight: 800; color: var(--text-dark); cursor: pointer; }
+        .drawer-chip-btn.active { border-color: #e11d48; background: #fff1f2; color: #e11d48; font-weight: 900; }
+
+        .drawer-quantity-counter { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 4px 12px; margin-bottom: 10px; }
+        .btn-counter-step { width: 30px; height: 30px; border-radius: 6px; border: none; background: #e2e8f0; color: #0f172a; font-size: 16px; font-weight: 900; cursor: pointer; }
+        .counter-number-input { width: 70px; background: transparent; border: none; text-align: center; font-size: 16px; font-weight: 900; color: #0f172a; outline: none; }
+
+        .drawer-commission-card { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 7px 12px; margin-bottom: 10px; font-size: 11.5px; display: flex; flex-direction: column; gap: 3px; }
+        .comm-row { display: flex; justify-content: space-between; color: #64748b; font-weight: 600; }
+        .comm-row strong { color: #0f172a; font-weight: 800; }
+
+        .drawer-total-summary { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .drawer-total-summary strong { color: #e11d48; font-size: 18px; font-weight: 900; }
+
+        .drawer-action-buttons { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; padding-top: 4px; position: sticky; bottom: 0; background: #fff; }
+        .btn-drawer-cancel { flex: 1; padding: 11px; background: #f1f5f9; border: none; border-radius: 25px; color: var(--text-dark); font-weight: 800; font-size: 13.5px; cursor: pointer; }
+        .btn-drawer-confirm { flex: 2; padding: 11px; background: var(--primary-gradient); border: none; border-radius: 25px; color: #fff; font-weight: 900; font-size: 13.5px; cursor: pointer; box-shadow: 0 3px 12px rgba(225, 29, 72, 0.35); }
+
+        /* EXACT POPUP: CONGRATULATIONS & LOSS RECEIPT */
+        .result-popup-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(6px); z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; animation: modalFadeIn 0.25s ease-out; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+        .popup-card-structure { width: 100%; max-width: 320px; border-radius: 30px; position: relative; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; align-items: center; padding: 42px 18px 20px 18px; text-align: center; color: #fff; }
+        .popup-theme-win { background: linear-gradient(180deg, #ff7a63 0%, #ff4b4b 55%, #ee3535 100%); }
+        .popup-theme-loss { background: linear-gradient(180deg, #94a3b8 0%, #64748b 55%, #475569 100%); }
+
+        .popup-top-wings-badge { position: absolute; top: -44px; left: 50%; transform: translateX(-50%); }
+        .wings-decor-img { width: 165px; height: auto; }
+        .popup-headline-title { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; margin-top: 8px; font-family: 'Poppins', sans-serif; }
+
+        .lottery-results-pill-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 10px 0 14px 0; font-size: 12.5px; font-weight: 700; }
+        .res-pill-tag { padding: 2px 9px; border-radius: 12px; font-size: 10.5px; font-weight: 900; }
+        .tag-win-red { background: #ef4444; color: #fff; }
+        .tag-win-green { background: #10b981; color: #fff; }
+        .tag-win-violet { background: #8b5cf6; color: #fff; }
+        .tag-win-gold { background: #f59e0b; color: #fff; }
+
+        .paper-dispenser-slot { width: 100%; background: rgba(0, 0, 0, 0.28); border-radius: 16px; padding: 7px 9px 12px 9px; box-shadow: inset 0 3px 6px rgba(0,0,0,0.35); }
+        .dispensed-receipt-ticket { background: #ffffff; border-radius: 12px; padding: 14px 10px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); position: relative; color: #0f172a; animation: slideReceiptDown 0.45s ease-out forwards; }
+        @keyframes slideReceiptDown { 0% { transform: translateY(-20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+
+        .receipt-header-type { font-size: 13.5px; font-weight: 800; color: #ef4444; margin-bottom: 2px; }
+        .receipt-header-type.loss-type { color: #64748b; }
+        .receipt-payout-amount { font-size: 25px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px; color: #e11d48; }
+        .receipt-payout-amount.loss-amount { color: #475569; }
+        .receipt-period-meta { font-size: 10.5px; color: #64748b; font-weight: 700; line-height: 1.35; }
+
+        .auto-close-check-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.95); cursor: pointer; }
+        .popup-dismiss-circle-btn { margin-top: 16px; width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.85); background: transparent; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+
+        /* Toast */
+        #wingoToastBox { position: fixed; top: -90px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 410px; background: #0f172a; color: #ffffff; border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; z-index: 100000; box-shadow: 0 10px 30px rgba(0,0,0,0.25); border-left: 5px solid #e11d48; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); font-size: 12.5px; font-weight: 600; }
+        #wingoToastBox.show { top: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="wingo-app-wrapper">
+
+    <!-- Top Navbar -->
+    <div class="wingo-navbar">
+        <div class="nav-back-circle" onclick="exitToLobby()" title="হোমে ফিরে যান">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <div class="wingo-nav-title">
+            <i class="fa-solid fa-dice" style="color:#fbc02d;"></i> Win Go Lottery
+        </div>
+        <div class="nav-right-actions">
+            <div class="header-icon-btn" id="btnSoundToggle" onclick="toggleWingoSound()">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Elevated Balance Card -->
+    <div class="wingo-balance-card">
+        <div class="bal-left-box">
+            <div class="bal-label-row">
+                <i class="fa-solid fa-wallet" style="color:#f59e0b;"></i>
+                <span>ওয়ালেট মোট ব্যালেন্স</span>
+                <i class="fa-solid fa-arrows-rotate btn-bal-refresh" onclick="syncWingoUserBalance()"></i>
+            </div>
+            <div class="bal-amount-val">৳<span id="wingoUserBalance">0.00</span></div>
+        </div>
+        <div class="bal-right-actions">
+            <button class="btn-balance-action btn-action-deposit" onclick="exitToLobby('deposit')">
+                <i class="fa-solid fa-plus"></i> ডিপোজিট
+            </button>
+            <button class="btn-balance-action btn-action-withdraw" onclick="exitToLobby('withdraw')">
+                উইথড্র
+            </button>
+        </div>
+    </div>
+
+    <!-- 1000+ Realtime Synced AI Prediction Radar -->
+    <div class="ai-radar-box">
+        <div class="ai-radar-left">
+            <div class="ai-radar-icon"><i class="fa-solid fa-brain"></i></div>
+            <div class="ai-radar-meta">
+                <h5>AI প্রেডিকশন রাডার <span style="font-size:9px; background:#fef3c7; color:#d97706; padding:1px 6px; border-radius:6px;">LIVE</span></h5>
+                <p>১০০০+ ইউজারের জন্য সেন্ট্রাল লাইভ সিঙ্ক</p>
+            </div>
+        </div>
+        <div class="ai-radar-right">
+            <span class="ai-pred-pill" id="aiForecastPill">RED / BIG</span>
+            <div class="ai-pred-conf">সম্ভাবনা: <strong id="aiForecastPct">88%</strong></div>
+        </div>
+    </div>
+
+    <!-- Independent Market Selectors (30s, 1Min, 3Min, 5Min) -->
+    <div class="market-tabs-wrapper">
+        <div class="market-tab-card active" id="tabMode_30s" onclick="switchMarketMode('30s')">
+            <i class="fa-solid fa-stopwatch"></i>
+            <span>Win Go 30s</span>
+        </div>
+        <div class="market-tab-card" id="tabMode_1min" onclick="switchMarketMode('1min')">
+            <i class="fa-solid fa-clock"></i>
+            <span>Win Go 1Min</span>
+        </div>
+        <div class="market-tab-card" id="tabMode_3min" onclick="switchMarketMode('3min')">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <span>Win Go 3Min</span>
+        </div>
+        <div class="market-tab-card" id="tabMode_5min" onclick="switchMarketMode('5min')">
+            <i class="fa-solid fa-business-time"></i>
+            <span>Win Go 5Min</span>
+        </div>
+    </div>
+
+    <!-- Stage Period & Live Flip Clock Card -->
+    <div class="stage-banner-card">
+        <div class="stage-left-info">
+            <div class="stage-rule-link" onclick="showHowToPlayModal()">
+                <i class="fa-solid fa-circle-question"></i> খেলার নিয়মাবলী (২% ফি)
+            </div>
+            <div class="stage-market-tag" id="currentMarketLabelText">Win Go 30s Market</div>
+            <div class="stage-period-number" id="currentPeriodDisplay">2026102903001</div>
+        </div>
+
+        <div class="stage-right-clock">
+            <div class="stage-clock-heading">Time Remaining</div>
+            <div class="countdown-boxes-row">
+                <div class="flip-clock-box" id="timerMin0">0</div>
+                <div class="flip-clock-box" id="timerMin1">0</div>
+                <div class="flip-clock-colon">:</div>
+                <div class="flip-clock-box" id="timerSec0">3</div>
+                <div class="flip-clock-box" id="timerSec1">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Primary Betting Station -->
+    <div class="betting-station-card">
+        <!-- 5-Second Luxury Curtain Overlay -->
+        <div class="betting-lock-curtain" id="bettingLockCurtain">
+            <div class="lock-pulse-orb">
+                <div class="lock-giant-number" id="curtainSecondsNum">5</div>
+            </div>
+            <div class="lock-status-badge">
+                <i class="fa-solid fa-lock"></i>
+                <span>বেটিং লক! রেজাল্ট প্রস্তুত হচ্ছে...</span>
+            </div>
+        </div>
+
+        <!-- 3 Colors Row -->
+        <div class="colors-button-row">
+            <button class="btn-bet-color btn-color-green" onclick="triggerBetDrawer('Green', 'COLOR', 2, '#059669')">
+                <span>Green</span>
+                <span class="bet-mult-label">2X</span>
+            </button>
+            <button class="btn-bet-color btn-color-violet" onclick="triggerBetDrawer('Violet', 'COLOR', 4.5, '#7c3aed')">
+                <span>Violet</span>
+                <span class="bet-mult-label">4.5X</span>
+            </button>
+            <button class="btn-bet-color btn-color-red" onclick="triggerBetDrawer('Red', 'COLOR', 2, '#dc2626')">
+                <span>Red</span>
+                <span class="bet-mult-label">2X</span>
+            </button>
+        </div>
+
+        <!-- 0-9 Circular Numbers Grid -->
+        <div class="numbers-circular-grid">
+            <button class="num-circle-btn num-ball-zero" onclick="triggerBetDrawer('0', 'NUMBER', 9, '#ef4444')">0 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-green" onclick="triggerBetDrawer('1', 'NUMBER', 9, '#10b981')">1 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-red" onclick="triggerBetDrawer('2', 'NUMBER', 9, '#ef4444')">2 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-green" onclick="triggerBetDrawer('3', 'NUMBER', 9, '#10b981')">3 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-red" onclick="triggerBetDrawer('4', 'NUMBER', 9, '#ef4444')">4 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-five" onclick="triggerBetDrawer('5', 'NUMBER', 9, '#10b981')">5 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-red" onclick="triggerBetDrawer('6', 'NUMBER', 9, '#ef4444')">6 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-green" onclick="triggerBetDrawer('7', 'NUMBER', 9, '#10b981')">7 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-red" onclick="triggerBetDrawer('8', 'NUMBER', 9, '#ef4444')">8 <span class="num-mult-tag">9X</span></button>
+            <button class="num-circle-btn num-ball-green" onclick="triggerBetDrawer('9', 'NUMBER', 9, '#10b981')">9 <span class="num-mult-tag">9X</span></button>
+        </div>
+
+        <!-- Multiplier Chips Bar -->
+        <div class="multiplier-pills-bar">
+            <div class="mult-pill-chip active" onclick="applyQuickMultiplier(1, this)">X1</div>
+            <div class="mult-pill-chip" onclick="applyQuickMultiplier(5, this)">X5</div>
+            <div class="mult-pill-chip" onclick="applyQuickMultiplier(10, this)">X10</div>
+            <div class="mult-pill-chip" onclick="applyQuickMultiplier(20, this)">X20</div>
+            <div class="mult-pill-chip" onclick="applyQuickMultiplier(50, this)">X50</div>
+            <div class="mult-pill-chip" onclick="applyQuickMultiplier(100, this)">X100</div>
+        </div>
+
+        <!-- Big / Small Row -->
+        <div class="big-small-action-row">
+            <button class="btn-big-small-opt btn-opt-big" onclick="triggerBetDrawer('Big', 'SIZE', 2, '#d97706')">
+                <span>Big (5-9)</span>
+                <span style="font-size:11px; opacity:0.95;">2X</span>
+            </button>
+            <button class="btn-big-small-opt btn-opt-small" onclick="triggerBetDrawer('Small', 'SIZE', 2, '#2563eb')">
+                <span>Small (0-4)</span>
+                <span style="font-size:11px; opacity:0.95;">2X</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- History Tabs (Game Record / Trend Chart / My Bets) -->
+    <div class="history-tabs-container">
+        <div class="history-nav-tab active" onclick="switchDataTab('record', this)">Game Record</div>
+        <div class="history-nav-tab" onclick="switchDataTab('chart', this)">Trend Chart</div>
+        <div class="history-nav-tab" onclick="switchDataTab('mybets', this)">My Bets</div>
+    </div>
+
+    <!-- Data Display Section -->
+    <div class="history-display-sheet">
+        <!-- TAB 1: GAME RECORD -->
+        <div id="tabContent_Record">
+            <table class="wingo-data-table">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Number</th>
+                        <th>Big/Small</th>
+                        <th>Color</th>
+                    </tr>
+                </thead>
+                <tbody id="gameRecordTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- TAB 2: TREND CHART -->
+        <div id="tabContent_Chart" style="display:none;">
+            <table class="wingo-data-table">
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Win</th>
+                        <th>0 1 2 3 4 5 6 7 8 9</th>
+                    </tr>
+                </thead>
+                <tbody id="trendChartTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- TAB 3: MY BETS -->
+        <div id="tabContent_MyBets" style="display:none;">
+            <div id="myBetsListDock" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ======================================================== -->
+<!-- COMPACT MOBILE BETTING BOTTOM DRAWER                     -->
+<!-- ======================================================== -->
+<div class="modal-bottom-drawer" id="bettingBottomDrawer">
+    <div class="drawer-sheet-body">
+        <div class="drawer-target-banner" id="drawerTargetBanner">Select Green</div>
+
+        <div class="drawer-section-title">বেট ব্যালেন্স নির্বাচন করুন:</div>
+        <div class="drawer-chips-grid">
+            <div class="drawer-chip-btn" onclick="selectDrawerBaseChip(1, this)">৳১</div>
+            <div class="drawer-chip-btn active" onclick="selectDrawerBaseChip(10, this)">৳১০</div>
+            <div class="drawer-chip-btn" onclick="selectDrawerBaseChip(100, this)">৳১০০</div>
+            <div class="drawer-chip-btn" onclick="selectDrawerBaseChip(1000, this)">৳১,০০০</div>
+        </div>
+
+        <div class="drawer-section-title">সংখ্যা বা গুণক (Multiplier):</div>
+        <div class="drawer-quantity-counter">
+            <button class="btn-counter-step" onclick="adjustDrawerMultiplier(-1)">-</button>
+            <input type="number" id="drawerMultiplierInput" class="counter-number-input" value="1" min="1" oninput="updateDrawerTotalAmount()">
+            <button class="btn-counter-step" onclick="adjustDrawerMultiplier(1)">+</button>
+        </div>
+
+        <!-- 2% Official Commission Details Box -->
+        <div class="drawer-commission-card">
+            <div class="comm-row">
+                <span>মোট বিনিয়োগ (Total Bet):</span>
+                <strong>৳<span id="commTotalBet">10.00</span></strong>
+            </div>
+            <div class="comm-row">
+                <span>সার্ভিস ফি / প্ল্যাটফর্ম কমিশন (২%):</span>
+                <span style="color:#ef4444;">-৳<span id="commFeeAmount">0.20</span></span>
+            </div>
+            <div class="comm-row">
+                <span>প্রকৃত কন্ট্রাক্ট অ্যামাউন্ট (Contract):</span>
+                <strong style="color:#10b981;">৳<span id="commContractAmount">9.80</span></strong>
+            </div>
+        </div>
+
+        <div class="drawer-total-summary">
+            <span>একাউন্ট থেকে কাটবে:</span>
+            <strong>৳<span id="drawerTotalValueDisplay">10.00</span></strong>
+        </div>
+
+        <div class="drawer-action-buttons">
+            <button class="btn-drawer-cancel" onclick="closeDrawerSheet()">Cancel</button>
+            <button class="btn-drawer-confirm" onclick="processWingoBetSubmission()">Confirm Bet (৳<span id="drawerSubmitBtnTotal">10</span>)</button>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- EXACT SCREENSHOT POPUP: CONGRATULATIONS & LOSS RECEIPT   -->
+<!-- ======================================================== -->
+<div class="result-popup-backdrop" id="resultPopupBackdrop">
+    <div class="popup-card-structure popup-theme-win" id="resultPopupCard">
+        <!-- Winged Top Medallion Badge (SVG Wings & Rocket Medallion) -->
+        <div class="popup-top-wings-badge">
+            <svg class="wings-decor-img" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M70 55C50 40 25 35 5 45C15 58 35 68 65 65C45 68 25 75 12 85C30 92 55 88 72 72Z" fill="#ffdfba" opacity="0.95"/>
+                <path d="M130 55C150 40 175 35 195 45C185 58 165 68 135 65C155 68 175 75 188 85C170 92 145 88 128 72Z" fill="#ffdfba" opacity="0.95"/>
+                <path d="M30 65C60 52 140 52 170 65C155 82 135 90 100 86C65 90 45 82 30 65Z" fill="#f59e0b"/>
+                <circle cx="100" cy="46" r="32" fill="#ffd700" stroke="#fff" stroke-width="3"/>
+                <circle cx="100" cy="46" r="26" fill="#f59e0b"/>
+                <circle cx="100" cy="46" r="21" fill="#fff" opacity="0.2"/>
+                <path d="M100 32C94 36 91 44 91 50L95 53L97 61L100 58L103 61L105 53L109 50C109 44 106 36 100 32Z" fill="#ffffff"/>
+                <circle cx="100" cy="44" r="3" fill="#f59e0b"/>
+            </svg>
+        </div>
+
+        <div class="popup-headline-title" id="popupHeadlineTitle">Congratulations</div>
+
+        <!-- Lottery Results Badges -->
+        <div class="lottery-results-pill-row">
+            <span>Lottery results</span>
+            <span class="res-pill-tag tag-win-red" id="resTagColor">Red</span>
+            <span class="res-pill-tag tag-win-gold" id="resTagNum">8</span>
+            <span class="res-pill-tag tag-win-red" id="resTagSize">Big</span>
+        </div>
+
+        <!-- Paper Dispenser Slot & Animated Ticket -->
+        <div class="paper-dispenser-slot">
+            <div class="dispensed-receipt-ticket">
+                <div class="receipt-header-type" id="receiptHeaderType">Bonus</div>
+                <div class="receipt-payout-amount" id="receiptPayoutAmount">৳39,200.00</div>
+                <div class="receipt-period-meta">
+                    <div>Period: <span id="receiptPeriodName">WinGo 1 Min</span></div>
+                    <div id="receiptPeriodCode">20261026100010943</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Seconds Auto Close Row -->
+        <div class="auto-close-check-row" onclick="dismissResultPopup()">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="autoCloseCountdownText">3 seconds auto close</span>
+        </div>
+    </div>
+
+    <!-- Floating Circular Close Button (X) -->
+    <div class="popup-dismiss-circle-btn" onclick="dismissResultPopup()">
+        <i class="fa-solid fa-xmark"></i>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="wingoToastBox">
+    <i class="fa-solid fa-circle-check" id="toastStatusIcon" style="color:#e11d48; font-size:18px;"></i>
+    <span id="toastMessageText">নোটিফিকেশন বার্তা</span>
+</div>
+
+<!-- ======================================================== -->
+<!-- MASTER JAVASCRIPT LOGIC: 100% WORKING BALANCE & ENGINE   -->
+<!-- ======================================================== -->
+<script>
+    /* ================= 1. FIREBASE CONFIG ================= */
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeAEYWjBUHi76W2s3dIvu41CEu1wuXYxk",
+        authDomain: "avatar-game-335d4.firebaseapp.com",
+        projectId: "avatar-game-335d4",
+        storageBucket: "avatar-game-335d4.firebasestorage.app",
+        messagingSenderId: "848880921478",
+        appId: "1:848880921478:web:74461e00fe8a3edc129a07",
+        measurementId: "G-ST38JDVKQ4",
+        databaseURL: "https://avatar-game-335d4-default-rtdb.firebaseio.com"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    let serverClockOffset = 0;
+    db.ref('.info/serverTimeOffset').on('value', snap => {
+        serverClockOffset = snap.val() || 0;
+    });
+    function getSyncedEpoch() {
+        return Date.now() + serverClockOffset;
+    }
+
+    /* ================= 2. USER AUTH & FAIL-SAFE BALANCE ================= */
+    let currentUser = JSON.parse(localStorage.getItem('dk_active_user')) || null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryUID = urlParams.get('uid');
+
+    if (queryUID) {
+        if (!currentUser || currentUser.uid !== queryUID) {
+            currentUser = { uid: queryUID, balance: parseFloat(urlParams.get('bal') || 0), username: 'MEMBER' + queryUID };
+            localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        }
+    }
+
+    if (currentUser && currentUser.uid) {
+        attachUserBalanceSync();
+        listenUserWingoBetsFromFirebase();
+    } else {
+        currentUser = { uid: "1001", username: "GuestMember", balance: 5000.00, wagerDone: 0, totalWagered: 0 };
+        localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        attachUserBalanceSync();
+        listenUserWingoBetsFromFirebase();
+    }
+
+    function attachUserBalanceSync() {
+        if (!currentUser || !currentUser.uid) return;
+        db.ref('users/' + currentUser.uid).on('value', snap => {
+            if (snap.exists()) {
+                const u = snap.val();
+                currentUser.balance = parseFloat(u.balance || 0);
+                currentUser.wagerDone = parseFloat(u.wagerDone || 0);
+                currentUser.totalWagered = parseFloat(u.totalWagered || 0);
+                localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+                updateBalanceUI();
+            }
+        });
+        updateBalanceUI();
+    }
+
+    function syncWingoUserBalance() {
+        if (!currentUser || !currentUser.uid) return;
+        showToast('ব্যালেন্স সিঙ্ক হচ্ছে...');
+        db.ref('users/' + currentUser.uid + '/balance').once('value', snap => {
+            if (snap.exists()) {
+                currentUser.balance = parseFloat(snap.val() || 0);
+                localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+                updateBalanceUI();
+                showToast('ব্যালেন্স আপডেট সফল!');
+            }
+        });
+    }
+
+    function updateBalanceUI() {
+        if (!currentUser) return;
+        const balElem = document.getElementById('wingoUserBalance');
+        if (balElem) balElem.innerText = parseFloat(currentUser.balance || 0).toFixed(2);
+    }
+
+    function exitToLobby(destination = '') {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ action: 'closeGame', destination: destination }, '*');
+        }
+        window.location.href = 'index.html' + (destination ? '#' + destination : '');
+    }
+
+    /* ================= 3. AUDIO ENGINE ================= */
+    class WingoSoundSynth {
+        constructor() {
+            this.ctx = null;
+            this.enabled = true;
+        }
+        init() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+        playTick() {
+            if (!this.enabled) return;
+            this.init();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.08);
+        }
+        playWin() {
+            if (!this.enabled) return;
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.1);
+            osc.frequency.setValueAtTime(783.99, now + 0.2);
+            osc.frequency.setValueAtTime(1046.50, now + 0.3);
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.6);
+        }
+        playLoss() {
+            if (!this.enabled) return;
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(120, now + 0.35);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        }
+    }
+    const wingoSound = new WingoSoundSynth();
+
+    function toggleWingoSound() {
+        wingoSound.enabled = !wingoSound.enabled;
+        const icon = document.getElementById('soundIcon');
+        icon.className = wingoSound.enabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+        showToast(wingoSound.enabled ? 'সাউন্ড চালু হয়েছে' : 'সাউন্ড বন্ধ হয়েছে');
+    }
+
+    /* ======================================================== */
+    /* 4. INDEPENDENT MULTI-MARKET SYSTEM (30s, 1m, 3m, 5m)     */
+    /* ======================================================== */
+    let activeMarketKey = '30s';
+
+    const markets = {
+        '30s': {
+            label: 'Win Go 30s',
+            duration: 30,
+            prefix: '030',
+            currentPeriod: '',
+            remainingSec: 30,
+            isLocked: false,
+            history: [],
+            activeBets: []
+        },
+        '1min': {
+            label: 'Win Go 1Min',
+            duration: 60,
+            prefix: '01M',
+            currentPeriod: '',
+            remainingSec: 60,
+            isLocked: false,
+            history: [],
+            activeBets: []
+        },
+        '3min': {
+            label: 'Win Go 3Min',
+            duration: 180,
+            prefix: '03M',
+            currentPeriod: '',
+            remainingSec: 180,
+            isLocked: false,
+            history: [],
+            activeBets: []
+        },
+        '5min': {
+            label: 'Win Go 5Min',
+            duration: 300,
+            prefix: '05M',
+            currentPeriod: '',
+            remainingSec: 300,
+            isLocked: false,
+            history: [],
+            activeBets: []
+        }
+    };
+
+    function switchMarketMode(marketKey) {
+        if (!markets[marketKey]) return;
+        activeMarketKey = marketKey;
+
+        document.querySelectorAll('.market-tab-card').forEach(c => c.classList.remove('active'));
+        document.getElementById(`tabMode_${marketKey}`).classList.add('active');
+
+        document.getElementById('currentMarketLabelText').innerText = markets[marketKey].label + ' Market';
+        document.getElementById('currentPeriodDisplay').innerText = markets[marketKey].currentPeriod || 'Loading...';
+
+        renderClockDisplay(markets[marketKey].remainingSec);
+        toggleCurtainLock(markets[marketKey].isLocked, markets[marketKey].remainingSec);
+
+        renderHistoryTables();
+        renderMyBetsListUI();
+        updateAiRadarPrediction(markets[marketKey].currentPeriod);
+
+        showToast(`${markets[marketKey].label} সিলেক্ট করা হয়েছে`);
+    }
+
+    function initMultiMarketClockLoops() {
+        setInterval(() => {
+            const now = getSyncedEpoch();
+            const dateObj = new Date(now);
+            const dateCode = dateObj.toISOString().slice(0, 10).replace(/-/g, '');
+            const secondsOfDay = (dateObj.getHours() * 3600) + (dateObj.getMinutes() * 60) + dateObj.getSeconds();
+
+            Object.keys(markets).forEach(key => {
+                const m = markets[key];
+                const roundIndex = Math.floor(secondsOfDay / m.duration);
+                const periodNum = `${dateCode}${m.prefix}${String(roundIndex).padStart(4, '0')}`;
+                const remaining = m.duration - (secondsOfDay % m.duration);
+
+                m.remainingSec = remaining;
+
+                db.ref(`wingoAdminLive/${key}/liveStatus`).update({
+                    period: periodNum,
+                    remainingSec: remaining,
+                    isLocked: remaining <= 5,
+                    timestamp: now
+                }).catch(() => {});
+
+                if (m.currentPeriod !== periodNum) {
+                    if (m.currentPeriod !== '') {
+                        finalizeMarketRound(key, m.currentPeriod);
+                    }
+                    m.currentPeriod = periodNum;
+                    if (activeMarketKey === key) {
+                        document.getElementById('currentPeriodDisplay').innerText = m.currentPeriod;
+                        updateAiRadarPrediction(m.currentPeriod);
+                    }
+                }
+
+                if (remaining <= 5) {
+                    m.isLocked = true;
+                    if (activeMarketKey === key) {
+                        toggleCurtainLock(true, remaining);
+                        wingoSound.playTick();
+                    }
+                } else {
+                    m.isLocked = false;
+                    if (activeMarketKey === key) {
+                        toggleCurtainLock(false);
+                    }
+                }
+
+                if (activeMarketKey === key) {
+                    renderClockDisplay(remaining);
+                }
+            });
+        }, 1000);
+    }
+
+    function toggleCurtainLock(shouldLock, sec = 5) {
+        const curtain = document.getElementById('bettingLockCurtain');
+        const numText = document.getElementById('curtainSecondsNum');
+        if (shouldLock) {
+            curtain.style.display = 'flex';
+            numText.innerText = sec;
+        } else {
+            curtain.style.display = 'none';
+        }
+    }
+
+    function renderClockDisplay(secRemaining) {
+        const mins = Math.floor(secRemaining / 60);
+        const secs = secRemaining % 60;
+
+        const mStr = String(mins).padStart(2, '0');
+        const sStr = String(secs).padStart(2, '0');
+
+        document.getElementById('timerMin0').innerText = mStr[0];
+        document.getElementById('timerMin1').innerText = mStr[1];
+        document.getElementById('timerSec0').innerText = sStr[0];
+        document.getElementById('timerSec1').innerText = sStr[1];
+    }
+
+    /* ======================================================== */
+    /* 5. 1000+ USERS SYNCHRONIZED AI PREDICTION RADAR          */
+    /* ======================================================== */
+    function updateAiRadarPrediction(periodCode) {
+        if (!periodCode) return;
+        let hash = 0;
+        for (let i = 0; i < periodCode.length; i++) {
+            hash = (hash << 5) - hash + periodCode.charCodeAt(i);
+            hash |= 0;
+        }
+        const seed = Math.abs(hash);
+        const colorOpt = (seed % 2 === 0) ? 'RED' : 'GREEN';
+        const sizeOpt = ((seed >> 2) % 2 === 0) ? 'BIG' : 'SMALL';
+        const confPct = 78 + (seed % 17);
+
+        const pill = document.getElementById('aiForecastPill');
+        const pct = document.getElementById('aiForecastPct');
+
+        if (pill) {
+            pill.innerText = `${colorOpt} / ${sizeOpt}`;
+            pill.style.background = (colorOpt === 'RED') ? '#ef4444' : '#10b981';
+        }
+        if (pct) pct.innerText = confPct + '%';
+    }
+
+    /* ======================================================== */
+    /* 6. ADMIN CONTROL & SETTLEMENT ENGINE                     */
+    /* ======================================================== */
+    function finalizeMarketRound(marketKey, periodCode) {
+        db.ref(`wingoControl/${marketKey}/nextResult`).once('value', ctrlSnap => {
+            let winNum = null;
+
+            if (ctrlSnap.exists() && ctrlSnap.val() !== null && ctrlSnap.val() !== '') {
+                winNum = parseInt(ctrlSnap.val());
+                db.ref(`wingoControl/${marketKey}/nextResult`).remove();
+                processMarketResultOutcome(marketKey, periodCode, winNum);
+            } else {
+                db.ref(`wingoAdminLive/${marketKey}/currentBets/${periodCode}`).once('value', betsSnap => {
+                    if (betsSnap.exists()) {
+                        const allRoundBets = Object.values(betsSnap.val());
+                        winNum = calculateLeastPayoutNumber(allRoundBets);
+                    } else {
+                        winNum = Math.floor(Math.random() * 10);
+                    }
+                    processMarketResultOutcome(marketKey, periodCode, winNum);
+                });
+            }
+        });
+    }
+
+    function calculateLeastPayoutNumber(betsList) {
+        if (!betsList || betsList.length === 0) return Math.floor(Math.random() * 10);
+
+        const payoutEstimates = {};
+        for (let num = 0; num <= 9; num++) {
+            payoutEstimates[num] = 0;
+            betsList.forEach(b => {
+                const amt = Number(b.contractAmount || b.amount || 0);
+                if (b.type === 'NUMBER' && parseInt(b.target) === num) payoutEstimates[num] += (amt * 9);
+                else if (b.type === 'SIZE') {
+                    if (b.target === 'Big' && num >= 5) payoutEstimates[num] += (amt * 2);
+                    else if (b.target === 'Small' && num < 5) payoutEstimates[num] += (amt * 2);
+                } else if (b.type === 'COLOR') {
+                    if (b.target === 'Green' && [1, 3, 7, 9].includes(num)) payoutEstimates[num] += (amt * 2);
+                    else if (b.target === 'Green' && num === 5) payoutEstimates[num] += (amt * 1.5);
+                    else if (b.target === 'Red' && [2, 4, 6, 8].includes(num)) payoutEstimates[num] += (amt * 2);
+                    else if (b.target === 'Red' && num === 0) payoutEstimates[num] += (amt * 1.5);
+                    else if (b.target === 'Violet' && (num === 0 || num === 5)) payoutEstimates[num] += (amt * 4.5);
+                }
+            });
+        }
+
+        let bestNumber = 0;
+        let minPayout = payoutEstimates[0];
+        for (let num = 1; num <= 9; num++) {
+            if (payoutEstimates[num] < minPayout) {
+                minPayout = payoutEstimates[num];
+                bestNumber = num;
+            }
+        }
+        return bestNumber;
+    }
+
+    function processMarketResultOutcome(marketKey, periodCode, winNum) {
+        const m = markets[marketKey];
+        const isBig = winNum >= 5;
+        let colorType = 'Green';
+
+        if (winNum === 0) colorType = 'Red+Violet';
+        else if (winNum === 5) colorType = 'Green+Violet';
+        else if ([2, 4, 6, 8].includes(winNum)) colorType = 'Red';
+        else colorType = 'Green';
+
+        const record = {
+            period: periodCode,
+            number: winNum,
+            size: isBig ? 'Big' : 'Small',
+            color: (winNum === 0 ? 'zero' : (winNum === 5 ? 'five' : colorType.toLowerCase()))
+        };
+
+        m.history.unshift(record);
+        if (m.history.length > 50) m.history.pop();
+
+        db.ref(`wingoAdminLive/${marketKey}/historyRecord/${periodCode}`).set(record).catch(() => {});
+
+        if (activeMarketKey === marketKey) {
+            renderHistoryTables();
+        }
+
+        settleMarketUserBets(marketKey, periodCode, winNum, colorType, isBig ? 'Big' : 'Small');
+    }
+
+    function settleMarketUserBets(marketKey, periodCode, winNum, colorName, sizeName) {
+        const m = markets[marketKey];
+        if (!currentUser || !m.activeBets.length) return;
+
+        let totalWinPayout = 0;
+        let totalLossAmount = 0;
+        let hasWonAny = false;
+
+        m.activeBets.forEach(bet => {
+            let won = false;
+            let mult = 0;
+
+            if (bet.type === 'NUMBER' && parseInt(bet.target) === winNum) {
+                won = true;
+                mult = 9;
+            } else if (bet.type === 'SIZE') {
+                if ((bet.target === 'Big' && winNum >= 5) || (bet.target === 'Small' && winNum < 5)) {
+                    won = true;
+                    mult = 2;
+                }
+            } else if (bet.type === 'COLOR') {
+                if (bet.target === 'Green' && [1, 3, 7, 9].includes(winNum)) { won = true; mult = 2; }
+                else if (bet.target === 'Green' && winNum === 5) { won = true; mult = 1.5; }
+                else if (bet.target === 'Red' && [2, 4, 6, 8].includes(winNum)) { won = true; mult = 2; }
+                else if (bet.target === 'Red' && winNum === 0) { won = true; mult = 1.5; }
+                else if (bet.target === 'Violet' && (winNum === 0 || winNum === 5)) { won = true; mult = 4.5; }
+            }
+
+            const contractAmt = bet.contractAmount || (bet.amount * 0.98);
+            const payout = won ? parseFloat((contractAmt * mult).toFixed(2)) : 0;
+
+            if (won) {
+                totalWinPayout += payout;
+                hasWonAny = true;
+            } else {
+                totalLossAmount += bet.amount;
+            }
+
+            updateUserBetStatusInFirebase(bet.dbKey, won, payout, winNum, colorName, sizeName);
+        });
+
+        if (hasWonAny && totalWinPayout > 0) {
+            const updatedBal = parseFloat((currentUser.balance + totalWinPayout).toFixed(2));
+            currentUser.balance = updatedBal;
+            localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+            updateBalanceUI();
+
+            db.ref('users/' + currentUser.uid).update({ balance: updatedBal }).catch(() => {});
+            wingoSound.playWin();
+
+            showResultReceiptModal(true, totalWinPayout, periodCode, winNum, colorName, sizeName, markets[marketKey].label);
+        } else if (totalLossAmount > 0) {
+            wingoSound.playLoss();
+            showResultReceiptModal(false, totalLossAmount, periodCode, winNum, colorName, sizeName, markets[marketKey].label);
+        }
+
+        m.activeBets = [];
+    }
+
+    /* ======================================================== */
+    /* 7. POPUP MODAL ENGINE: CONGRATULATIONS & LOSS RECEIPT    */
+    /* ======================================================== */
+    let popupAutoCloseTimer = null;
+
+    function showResultReceiptModal(isWin, amount, periodCode, winNum, colorName, sizeName, marketLabel) {
+        const modal = document.getElementById('resultPopupBackdrop');
+        const card = document.getElementById('resultPopupCard');
+        const titleElem = document.getElementById('popupHeadlineTitle');
+        const typeElem = document.getElementById('receiptHeaderType');
+        const amountElem = document.getElementById('receiptPayoutAmount');
+        const periodNameElem = document.getElementById('receiptPeriodName');
+        const periodCodeElem = document.getElementById('receiptPeriodCode');
+
+        const tagCol = document.getElementById('resTagColor');
+        const tagNum = document.getElementById('resTagNum');
+        const tagSz = document.getElementById('resTagSize');
+
+        tagNum.innerText = winNum;
+        tagSz.innerText = sizeName;
+        tagCol.innerText = colorName;
+
+        if (colorName.includes('Red')) tagCol.className = 'res-pill-tag tag-win-red';
+        else if (colorName.includes('Green')) tagCol.className = 'res-pill-tag tag-win-green';
+        else tagCol.className = 'res-pill-tag tag-win-violet';
+
+        periodNameElem.innerText = marketLabel || 'WinGo 1 Min';
+        periodCodeElem.innerText = periodCode;
+
+        if (isWin) {
+            card.className = 'popup-card-structure popup-theme-win';
+            titleElem.innerText = 'Congratulations';
+            typeElem.className = 'receipt-header-type';
+            typeElem.innerText = 'Bonus';
+            amountElem.className = 'receipt-payout-amount';
+            amountElem.innerText = `৳${amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        } else {
+            card.className = 'popup-card-structure popup-theme-loss';
+            titleElem.innerText = 'Sorry!';
+            typeElem.className = 'receipt-header-type loss-type';
+            typeElem.innerText = 'Loss Amount';
+            amountElem.className = 'receipt-payout-amount loss-amount';
+            amountElem.innerText = `-৳${amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        }
+
+        modal.style.display = 'flex';
+
+        let remainingSeconds = 3;
+        const countdownText = document.getElementById('autoCloseCountdownText');
+        countdownText.innerText = `${remainingSeconds} seconds auto close`;
+
+        if (popupAutoCloseTimer) clearInterval(popupAutoCloseTimer);
+
+        popupAutoCloseTimer = setInterval(() => {
+            remainingSeconds--;
+            if (remainingSeconds > 0) {
+                countdownText.innerText = `${remainingSeconds} seconds auto close`;
+            } else {
+                clearInterval(popupAutoCloseTimer);
+                dismissResultPopup();
+            }
+        }, 1000);
+    }
+
+    function dismissResultPopup() {
+        if (popupAutoCloseTimer) clearInterval(popupAutoCloseTimer);
+        document.getElementById('resultPopupBackdrop').style.display = 'none';
+    }
+
+    /* ======================================================== */
+    /* 8. REALTIME PERSISTENT MY BETS TRACKING                  */
+    /* ======================================================== */
+    let persistentMyBetsList = [];
+
+    function listenUserWingoBetsFromFirebase() {
+        if (!currentUser || !currentUser.uid) return;
+        db.ref('users/' + currentUser.uid + '/wingoBets').orderByChild('timestamp').limitToLast(40).on('value', snap => {
+            if (!snap.exists()) {
+                persistentMyBetsList = [];
+                renderMyBetsListUI();
+                return;
+            }
+            const list = [];
+            snap.forEach(c => {
+                const b = c.val();
+                b.key = c.key;
+                list.push(b);
+            });
+            list.sort((a, b) => b.timestamp - a.timestamp);
+            persistentMyBetsList = list;
+            renderMyBetsListUI();
+        });
+    }
+
+    function updateUserBetStatusInFirebase(betDbKey, isWin, payout, winNum, col, sz) {
+        if (!currentUser || !currentUser.uid || !betDbKey) return;
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+        const updateData = {
+            status: isWin ? 'WIN' : 'LOSS',
+            payout: Number(payout),
+            resultNumber: Number(winNum),
+            resultColor: String(col),
+            resultSize: String(sz),
+            settledAt: now
+        };
+
+        db.ref(`users/${currentUser.uid}/wingoBets/${betDbKey}`).update(updateData).catch(() => {});
+
+        if (isWin && payout > 0) {
+            db.ref(`users/${currentUser.uid}/transactions`).push().set({
+                type: 'Win Go Payout',
+                detail: `Win Go Reward #${betDbKey}`,
+                status: 'Success',
+                amount: payout,
+                time: now,
+                timestamp: Date.now()
+            }).catch(() => {});
+        }
+    }
+
+    function renderMyBetsListUI() {
+        const dock = document.getElementById('myBetsListDock');
+        if (!dock) return;
+
+        if (!persistentMyBetsList.length) {
+            dock.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:35px; font-size:13px; font-weight:700;">কোনো বেট হিস্টোরি পাওয়া যায়নি।</p>';
+            return;
+        }
+
+        dock.innerHTML = '';
+        persistentMyBetsList.forEach(b => {
+            let statusBadgeClass = 'status-waiting';
+            let netAmountSign = `-৳${b.amount}`;
+            let netAmountColor = '#64748b';
+
+            if (b.status === 'WIN') {
+                statusBadgeClass = 'status-win';
+                netAmountSign = `+৳${(b.payout - b.amount).toFixed(2)}`;
+                netAmountColor = '#10b981';
+            } else if (b.status === 'LOSS') {
+                statusBadgeClass = 'status-loss';
+                netAmountSign = `-৳${b.amount}`;
+                netAmountColor = '#ef4444';
+            }
+
+            dock.innerHTML += `
+                <div class="my-bet-card-node">
+                    <div class="bet-card-header">
+                        <div class="bet-card-period">
+                            <i class="fa-solid fa-hashtag" style="color:#e11d48;"></i>
+                            <span>Period: ${b.period}</span>
+                            <span style="font-size:10px; color:#94a3b8; margin-left:4px;">(${b.marketKey || 'WinGo'})</span>
+                        </div>
+                        <span class="bet-badge-status ${statusBadgeClass}">${b.status}</span>
+                    </div>
+
+                    <div class="bet-card-row">
+                        <span>আপনার সিলেক্টেড আইটেম:</span>
+                        <strong style="color:#e11d48; font-size:13px;">${b.target} (${b.type})</strong>
+                    </div>
+
+                    <div class="bet-card-row">
+                        <span>মোট বেট / কন্ট্রাক্ট (২% ফি):</span>
+                        <strong>৳${b.amount} (কন্ট্রাক্ট: ৳${b.contractAmount || (b.amount * 0.98).toFixed(2)})</strong>
+                    </div>
+
+                    <div class="bet-card-row">
+                        <span>রাউন্ড ফলাফল:</span>
+                        <strong>${b.resultNumber !== undefined ? b.resultNumber + ' (' + b.resultColor + ')' : 'অপেক্ষমান...'}</strong>
+                    </div>
+
+                    <div class="bet-card-row" style="border-top: 1px dashed #f1f5f9; padding-top:6px; margin-top:2px;">
+                        <span>লাভ / ক্ষতি (Profit/Loss):</span>
+                        <strong style="color:${netAmountColor}; font-size:15px; font-weight:900;">${netAmountSign}</strong>
+                    </div>
+
+                    <div style="font-size:10px; color:#94a3b8; text-align:right;">${b.time}</div>
+                </div>
+            `;
+        });
+    }
+
+    /* Seed initial table history */
+    function seedAllMarketsInitialHistory() {
+        const now = getSyncedEpoch();
+        const dateObj = new Date(now);
+        const dateCode = dateObj.toISOString().slice(0, 10).replace(/-/g, '');
+
+        Object.keys(markets).forEach(k => {
+            const m = markets[k];
+            const dummy = [];
+            for (let i = 0; i < 15; i++) {
+                const num = Math.floor(Math.random() * 10);
+                let col = 'green';
+                if (num === 0) col = 'zero';
+                else if (num === 5) col = 'five';
+                else if ([2, 4, 6, 8].includes(num)) col = 'red';
+
+                dummy.push({
+                    period: `${dateCode}${m.prefix}${String(1000 - i).padStart(4, '0')}`,
+                    number: num,
+                    size: num >= 5 ? 'Big' : 'Small',
+                    color: col
+                });
+            }
+            m.history = dummy;
+        });
+        renderHistoryTables();
+    }
+
+    function renderHistoryTables() {
+        const recBody = document.getElementById('gameRecordTableBody');
+        const chartBody = document.getElementById('trendChartTableBody');
+        if (!recBody || !chartBody) return;
+
+        recBody.innerHTML = '';
+        chartBody.innerHTML = '';
+
+        const currentHist = markets[activeMarketKey].history;
+
+        currentHist.slice(0, 15).forEach(rec => {
+            let bubbleClass = 'bubble-' + rec.color;
+            let tagClass = rec.size === 'Big' ? 'pill-size-big' : 'pill-size-small';
+
+            recBody.innerHTML += `
+                <tr>
+                    <td style="font-weight:800; color:#475569;">${rec.period}</td>
+                    <td><div class="result-colored-bubble ${bubbleClass}">${rec.number}</div></td>
+                    <td><span class="pill-size-tag ${tagClass}">${rec.size}</span></td>
+                    <td><span style="font-size:11px; font-weight:800;">${rec.color === 'zero' ? 'Red+Violet' : (rec.color === 'five' ? 'Green+Violet' : rec.color.toUpperCase())}</span></td>
+                </tr>
+            `;
+
+            let chartColumns = '';
+            for (let i = 0; i <= 9; i++) {
+                if (i === rec.number) {
+                    chartColumns += `<span class="result-colored-bubble ${bubbleClass}" style="width:19px; height:19px; font-size:10px; margin:0 2px;">${i}</span>`;
+                } else {
+                    chartColumns += `<span style="display:inline-block; width:19px; text-align:center; color:#94a3b8; font-size:11px; margin:0 2px;">${i}</span>`;
+                }
+            }
+
+            chartBody.innerHTML += `
+                <tr>
+                    <td style="font-weight:800; color:#475569;">${rec.period.slice(-4)}</td>
+                    <td><strong>${rec.number}</strong></td>
+                    <td style="text-align:left; padding-left:10px;">${chartColumns}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function switchDataTab(tabKey, tabElem) {
+        document.querySelectorAll('.history-nav-tab').forEach(t => t.classList.remove('active'));
+        tabElem.classList.add('active');
+
+        document.getElementById('tabContent_Record').style.display = tabKey === 'record' ? 'block' : 'none';
+        document.getElementById('tabContent_Chart').style.display = tabKey === 'chart' ? 'block' : 'none';
+        document.getElementById('tabContent_MyBets').style.display = tabKey === 'mybets' ? 'block' : 'none';
+
+        if (tabKey === 'mybets') renderMyBetsListUI();
+    }
+
+    /* ======================================================== */
+    /* 9. BETTING DRAWER & BALANCE DEDUCTION                    */
+    /* ======================================================== */
+    let currentDrawerBet = { target: '', type: '', mult: 2, baseChip: 10, multiplier: 1 };
+
+    function triggerBetDrawer(target, type, mult, colorBg) {
+        const m = markets[activeMarketKey];
+        if (m.isLocked) {
+            showToast('বেটিং বন্ধ! ফলাফল আসা পর্যন্ত অপেক্ষা করুন।', true);
+            return;
+        }
+
+        currentDrawerBet = { target: target, type: type, mult: mult, baseChip: 10, multiplier: 1 };
+
+        const banner = document.getElementById('drawerTargetBanner');
+        banner.innerText = `Select ${target} (${mult}X)`;
+        banner.style.background = colorBg || '#ef4444';
+
+        document.getElementById('drawerMultiplierInput').value = 1;
+        updateDrawerTotalAmount();
+
+        document.getElementById('bettingBottomDrawer').style.display = 'flex';
+    }
+
+    function closeDrawerSheet() {
+        document.getElementById('bettingBottomDrawer').style.display = 'none';
+    }
+
+    function selectDrawerBaseChip(val, elem) {
+        document.querySelectorAll('.drawer-chip-btn').forEach(b => b.classList.remove('active'));
+        elem.classList.add('active');
+        currentDrawerBet.baseChip = val;
+        updateDrawerTotalAmount();
+    }
+
+    function adjustDrawerMultiplier(delta) {
+        const inp = document.getElementById('drawerMultiplierInput');
+        let current = parseInt(inp.value) || 1;
+        current = Math.max(1, current + delta);
+        inp.value = current;
+        currentDrawerBet.multiplier = current;
+        updateDrawerTotalAmount();
+    }
+
+    function applyQuickMultiplier(mult, elem) {
+        document.querySelectorAll('.mult-pill-chip').forEach(p => p.classList.remove('active'));
+        elem.classList.add('active');
+        document.getElementById('drawerMultiplierInput').value = mult;
+        currentDrawerBet.multiplier = mult;
+        updateDrawerTotalAmount();
+    }
+
+    function updateDrawerTotalAmount() {
+        const inp = document.getElementById('drawerMultiplierInput');
+        const qty = Math.max(1, parseInt(inp.value) || 1);
+        const total = currentDrawerBet.baseChip * qty;
+        const fee = parseFloat((total * 0.02).toFixed(2));
+        const contract = parseFloat((total - fee).toFixed(2));
+
+        document.getElementById('commTotalBet').innerText = total.toFixed(2);
+        document.getElementById('commFeeAmount').innerText = fee.toFixed(2);
+        document.getElementById('commContractAmount').innerText = contract.toFixed(2);
+
+        document.getElementById('drawerTotalValueDisplay').innerText = total.toFixed(2);
+        document.getElementById('drawerSubmitBtnTotal').innerText = total;
+    }
+
+    function processWingoBetSubmission() {
+        const m = markets[activeMarketKey];
+        if (m.isLocked) {
+            showToast('বেটিং বন্ধ! পরবর্তী রাউন্ডের জন্য অপেক্ষা করুন।', true);
+            closeDrawerSheet();
+            return;
+        }
+
+        const qty = parseInt(document.getElementById('drawerMultiplierInput').value) || 1;
+        const totalAmount = currentDrawerBet.baseChip * qty;
+        const feeAmount = parseFloat((totalAmount * 0.02).toFixed(2));
+        const contractAmount = parseFloat((totalAmount - feeAmount).toFixed(2));
+
+        if (!currentUser || (currentUser.balance || 0) < totalAmount) {
+            showToast('আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!', true);
+            return;
+        }
+
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const newBal = parseFloat((currentUser.balance - totalAmount).toFixed(2));
+        const newWager = parseFloat(((currentUser.wagerDone || 0) + totalAmount).toFixed(2));
+        const newTotalWager = parseFloat(((currentUser.totalWagered || 0) + totalAmount).toFixed(2));
+
+        // 1. Local update for zero lag
+        currentUser.balance = newBal;
+        currentUser.wagerDone = newWager;
+        currentUser.totalWagered = newTotalWager;
+        localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        updateBalanceUI();
+
+        // 2. Firebase User Update
+        db.ref('users/' + currentUser.uid).update({
+            balance: newBal,
+            wagerDone: newWager,
+            totalWagered: newTotalWager
+        }).catch(err => {
+            console.error("Firebase Balance Deduct Error: ", err);
+        });
+
+        // 3. Create Bet Payload
+        const newBetRef = db.ref(`users/${currentUser.uid}/wingoBets`).push();
+        const betKey = newBetRef.key;
+
+        const betPayload = {
+            id: betKey,
+            uid: currentUser.uid,
+            username: currentUser.username || ('MEMBER' + currentUser.uid),
+            phone: currentUser.phone || 'N/A',
+            marketKey: activeMarketKey,
+            period: m.currentPeriod,
+            target: currentDrawerBet.target,
+            type: currentDrawerBet.type,
+            amount: totalAmount,
+            fee: feeAmount,
+            contractAmount: contractAmount,
+            status: 'WAITING',
+            payout: 0,
+            time: now,
+            timestamp: getSyncedEpoch()
+        };
+
+        newBetRef.set(betPayload).catch(() => {});
+
+        // 4. Record Transaction Ledger
+        db.ref(`users/${currentUser.uid}/transactions`).push().set({
+            type: `Win Go Bet (${activeMarketKey})`,
+            detail: `Period #${m.currentPeriod} (${currentDrawerBet.target}) - Fee: ৳${feeAmount}`,
+            status: 'Deduct',
+            amount: -totalAmount,
+            time: now,
+            timestamp: Date.now()
+        }).catch(() => {});
+
+        // 5. Admin Live Broadcast
+        db.ref(`wingoAdminLive/${activeMarketKey}/currentBets/${m.currentPeriod}/${betKey}`).set(betPayload).catch(() => {});
+
+        m.activeBets.push({
+            dbKey: betKey,
+            period: m.currentPeriod,
+            target: currentDrawerBet.target,
+            type: currentDrawerBet.type,
+            amount: totalAmount,
+            contractAmount: contractAmount
+        });
+
+        closeDrawerSheet();
+        showToast(`বেট সফল: ৳${totalAmount} কাটা হয়েছে (২% ফি সহ)`);
+        renderMyBetsListUI();
+    }
+
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('wingoToastBox');
+        const text = document.getElementById('toastMessageText');
+        const icon = document.getElementById('toastStatusIcon');
+
+        text.innerText = msg;
+        icon.className = isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
+        icon.style.color = isError ? '#e11d48' : '#10b981';
+
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    function showHowToPlayModal() {
+        alert("Win Go ২% কমিশন নিয়মাবলী:\n১. প্রতিটি বেটে ২% প্ল্যাটফর্ম সার্ভিস ফি প্রযোজ্য।\n২. Green এ বেট করলে ১, ৩, ৭, ৯ আসলে কন্ট্রাক্ট অ্যামাউন্টের দ্বিগুণ এবং ৫ আসলে ১.৫ গুণ রিটার্ন।\n৩. Red এ বেট করলে ২, ৪, ৬, ৮ আসলে দ্বিগুণ এবং ০ আসলে ১.৫ গুণ রিটার্ন।\n৪. Violet এ বেট করলে ০ বা ৫ আসলে ৪.৫ গুণ রিটার্ন।\n৫. নির্দিষ্ট নাম্বারে (০-৯) বেট করলে ৯ গুণ রিটার্ন।\n৬. Big (৫-৯) বা Small (০-৪) এ বেট করলে দ্বিগুণ রিটার্ন।");
+    }
+
+    /* Start Master System */
+    window.addEventListener('DOMContentLoaded', () => {
+        seedAllMarketsInitialHistory();
+        initMultiMarketClockLoops();
+        switchMarketMode('30s');
+    });
+</script>
+
+</body>
+</html>

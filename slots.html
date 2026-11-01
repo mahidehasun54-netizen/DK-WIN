@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mega 777 Slots - 3D Ultra Pro Edition</title>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Poppins:wght@500;600;700;800;900&family=Hind+Siliguri:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --gold-bright: #ffd700;
+            --gold-dark: #b45309;
+            --gold-gradient: linear-gradient(135deg, #fff3a8 0%, #f5b700 50%, #b8860b 100%);
+            --ruby-cabinet: radial-gradient(circle at 50% 25%, #4a0314 0%, #220108 65%, #0e0004 100%);
+            --stage-dark: #070002;
+            --border-gold: 2px solid #ffd700;
+            --text-gold: #fde047;
+            --text-muted: #94a3b8;
+            --neon-glow: 0 0 20px rgba(255, 215, 0, 0.45);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background-color: #060002; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+
+        .slots-app-wrapper {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background: var(--ruby-cabinet);
+            position: relative;
+            box-shadow: 0 0 60px rgba(0,0,0,0.95);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            padding-bottom: 35px;
+            border-left: 1.5px solid #630c23;
+            border-right: 1.5px solid #630c23;
+        }
+
+        /* Top Vegas Navbar */
+        .slots-navbar {
+            background: rgba(14, 0, 4, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1.5px solid rgba(255, 215, 0, 0.35);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-back-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #23020b;
+            border: 1.5px solid #630c23;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            cursor: pointer;
+            color: #ffd700;
+            transition: transform 0.15s;
+        }
+        .nav-back-circle:active { transform: scale(0.9); }
+        .slots-brand-title {
+            font-family: 'Cinzel', serif;
+            font-size: 19px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        
+        .header-actions-flex { display: flex; align-items: center; gap: 8px; }
+        .nav-btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #23020b;
+            border: 1.5px solid #630c23;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            color: #ffd700;
+            transition: all 0.15s;
+        }
+        .nav-btn-icon:active { transform: scale(0.9); }
+        .nav-btn-icon.active { border-color: #ffd700; box-shadow: 0 0 12px rgba(255, 215, 0, 0.4); }
+
+        /* Jackpot Marquee Header */
+        .jackpot-banner-box {
+            margin: 10px 14px 6px 14px;
+            background: linear-gradient(135deg, #200108 0%, #3e0413 50%, #200108 100%);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 10px 14px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.25), inset 0 0 15px rgba(255, 215, 0, 0.15);
+            position: relative;
+        }
+        .jackpot-headline { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 900; letter-spacing: 2px; color: #ffd700; text-transform: uppercase; }
+        .jackpot-amount-glow { font-size: 26px; font-weight: 900; color: #ffffff; text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 2px 4px #000; letter-spacing: 1px; }
+
+        /* Balance & Stats Strip */
+        .slots-stats-strip { margin: 6px 14px 10px 14px; display: grid; grid-template-columns: 1.2fr 0.8fr 1fr; gap: 8px; }
+        .stat-pill-card { background: #180208; border: 1.5px solid #4a0618; border-radius: 12px; padding: 7px 10px; display: flex; flex-direction: column; justify-content: center; }
+        .stat-card-title { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
+        .stat-card-val { font-size: 14.5px; font-weight: 900; color: #fff; margin-top: 1px; }
+        .stat-card-val.green { color: #2ecc71; }
+        .stat-card-val.gold { color: #ffd700; }
+
+        /* ======================================================== */
+        /* 3D SLOT MACHINE CABINET (3 REELS x 3 ROWS)               */
+        /* ======================================================== */
+        .slot-machine-cabinet {
+            margin: 0 14px 14px 14px;
+            background: linear-gradient(180deg, #2d030e 0%, #110105 100%);
+            border: 3px solid #ffd700;
+            border-radius: 22px;
+            padding: 14px 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.85), inset 0 0 25px rgba(255, 215, 0, 0.2);
+            position: relative;
+        }
+
+        .cabinet-reels-stage {
+            background: var(--stage-dark);
+            border: 2px solid #58081f;
+            border-radius: 16px;
+            padding: 8px 6px;
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.95);
+        }
+
+        /* SVG Overlay for Winning Paylines */
+        .payline-svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        /* 3 Reels Columns */
+        .reel-column {
+            flex: 1;
+            margin: 0 4px;
+            background: linear-gradient(180deg, #150207 0%, #29040e 50%, #150207 100%);
+            border: 1.5px solid #4a0618;
+            border-radius: 12px;
+            height: 255px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 8px 16px rgba(0,0,0,0.85), inset 0 -8px 16px rgba(0,0,0,0.85);
+        }
+
+        /* Moving Reel Strip */
+        .reel-strip {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transform: translateY(0px);
+        }
+
+        /* 3D Vector Graphic Container */
+        .slot-symbol-cell {
+            height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 8px;
+            transition: transform 0.25s, filter 0.25s;
+        }
+        .slot-symbol-cell svg {
+            width: 58px;
+            height: 58px;
+            filter: drop-shadow(0 5px 8px rgba(0,0,0,0.6));
+        }
+
+        .slot-symbol-cell.symbol-win-highlight {
+            animation: symbolPulseGlow 0.5s infinite alternate;
+        }
+        @keyframes symbolPulseGlow {
+            from { transform: scale(1); filter: drop-shadow(0 0 10px #ffd700); }
+            to { transform: scale(1.18); filter: drop-shadow(0 0 20px #ffd700); }
+        }
+
+        /* Win Announcement Text */
+        .win-announcement-strip {
+            margin-top: 10px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14.5px;
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ======================================================== */
+        /* BET CONTROLLER & MANUAL SPIN DOCK                        */
+        /* ======================================================== */
+        .slot-control-dock {
+            margin: 0 14px 14px 14px;
+            background: linear-gradient(135deg, #180208 0%, #26030d 100%);
+            border: 1.5px solid #58081f;
+            border-radius: 20px;
+            padding: 14px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        .dock-row-controls { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; margin-bottom: 12px; }
+
+        .control-input-card {
+            background: #0f0105;
+            border: 1.5px solid #4a0618;
+            border-radius: 12px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card-label-small { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: flex; justify-content: space-between; }
+        
+        .stepper-amount-flex { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
+        .btn-stepper-square { width: 30px; height: 30px; border-radius: 8px; border: none; background: #2d040f; color: #ffd700; font-size: 16px; font-weight: 900; cursor: pointer; }
+        .btn-stepper-square:active { background: #58081f; }
+        .bet-display-field { width: 75px; background: transparent; border: none; text-align: center; font-size: 16px; font-weight: 900; color: #fff; outline: none; }
+
+        .paylines-count-text { font-size: 16px; font-weight: 900; color: #ffd700; text-align: center; margin-top: 4px; }
+
+        /* Quick Bet Chips */
+        .quick-chips-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px; }
+        .chip-bet-button { background: #1f020a; border: 1px solid #4a0618; border-radius: 8px; padding: 7px 0; text-align: center; font-size: 11px; font-weight: 800; color: #e2e8f0; cursor: pointer; transition: all 0.15s; }
+        .chip-bet-button:active { background: #58081f; color: #ffd700; }
+
+        /* MAIN SPIN ACTION BUTTON */
+        .btn-giant-spin {
+            width: 100%;
+            background: var(--gold-gradient);
+            border: 3px solid #fff;
+            border-radius: 30px;
+            padding: 15px 10px;
+            font-size: 20px;
+            font-weight: 900;
+            color: #110105;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(245, 183, 0, 0.5);
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-giant-spin:active { transform: scale(0.97); }
+        .btn-giant-spin.spinning { opacity: 0.6; pointer-events: none; filter: grayscale(0.4); }
+
+        /* ======================================================== */
+        /* TOP HEADER HISTORY MODAL                                 */
+        /* ======================================================== */
+        .history-modal-curtain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(14, 0, 4, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 18px;
+        }
+        .history-card-body {
+            background: linear-gradient(135deg, #1f0108 0%, #2e030e 100%);
+            border: 2px solid #ffd700;
+            border-radius: 22px;
+            width: 100%;
+            max-width: 380px;
+            padding: 18px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .history-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid #58081f;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .history-modal-head h4 { font-size: 15px; font-weight: 900; color: #ffd700; display: flex; align-items: center; gap: 6px; }
+        .btn-close-circle { width: 30px; height: 30px; border-radius: 50%; background: #3b0512; border: 1px solid #630c23; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .history-records-scroll { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 2px; }
+        .history-item-row { background: #130106; border: 1.5px solid #4a0618; border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+
+        /* Paytable Modal */
+        .paytable-grid-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .pay-symbol-item { background: #130106; border: 1px solid #4a0618; border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+        .pay-symbol-item strong { color: #ffd700; font-size: 14px; }
+
+        /* Toast */
+        #slotsToast { position: fixed; top: -90px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 400px; background: #180208; color: #ffffff; border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; z-index: 100000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border-left: 5px solid #ffd700; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); font-size: 13px; font-weight: 700; }
+        #slotsToast.show { top: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="slots-app-wrapper" id="slotsWrapper">
+
+    <!-- Top Navigation -->
+    <div class="slots-navbar">
+        <div class="nav-back-circle" onclick="exitToLobby()" title="হোমে ফিরে যান">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <div class="slots-brand-title">
+            <i class="fa-solid fa-crown"></i> MEGA 777
+        </div>
+        <div class="header-actions-flex">
+            <!-- Dedicated Top History Button -->
+            <div class="nav-btn-icon" onclick="openHistoryModal()" title="স্পিন হিস্টোরি">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <!-- Paytable Button -->
+            <div class="nav-btn-icon" onclick="openPaytableModal()" title="পে-টেবিল">
+                <i class="fa-solid fa-table-cells"></i>
+            </div>
+            <!-- Sound Button -->
+            <div class="nav-btn-icon active" id="btnSoundToggle" onclick="toggleSound()">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jackpot Marquee Banner -->
+    <div class="jackpot-banner-box">
+        <div class="jackpot-headline">★ GRAND JACKPOT POOL ★</div>
+        <div class="jackpot-amount-glow">৳<span id="jackpotPoolDisplay">8,450,290</span></div>
+    </div>
+
+    <!-- Balance & Live Stats Strip -->
+    <div class="slots-stats-strip">
+        <div class="stat-pill-card">
+            <span class="stat-card-title">ব্যালেন্স</span>
+            <span class="stat-card-val green">৳<span id="slotsBalanceVal">0.00</span></span>
+        </div>
+        <div class="stat-pill-card">
+            <span class="stat-card-title">পে-লাইন</span>
+            <span class="stat-card-val gold">5 LINES</span>
+        </div>
+        <div class="stat-pill-card">
+            <span class="stat-card-title">সর্বশেষ উইন</span>
+            <span class="stat-card-val gold">+৳<span id="lastWinDisplay">0.00</span></span>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 3D SLOT MACHINE CABINET (3 REELS x 3 ROWS)               -->
+    <!-- ======================================================== -->
+    <div class="slot-machine-cabinet">
+        <div class="cabinet-reels-stage" id="reelsStage">
+            <!-- SVG Overlay for Winning Paylines -->
+            <svg class="payline-svg-canvas" id="paylineSvgCanvas" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <!-- Lines drawn dynamically on win -->
+            </svg>
+
+            <!-- REEL 1 -->
+            <div class="reel-column" id="reelCol0">
+                <div class="reel-strip" id="reelStrip0"></div>
+            </div>
+
+            <!-- REEL 2 -->
+            <div class="reel-column" id="reelCol1">
+                <div class="reel-strip" id="reelStrip1"></div>
+            </div>
+
+            <!-- REEL 3 -->
+            <div class="reel-column" id="reelCol2">
+                <div class="reel-strip" id="reelStrip2"></div>
+            </div>
+        </div>
+
+        <!-- Win Announcement Text -->
+        <div class="win-announcement-strip" id="winAnnouncementNotice"></div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- CONTROLLER DOCK (NO AUTO SPIN - DIRECT MANUAL PLAY)       -->
+    <!-- ======================================================== -->
+    <div class="slot-control-dock">
+        <div class="dock-row-controls">
+            <!-- Bet per spin -->
+            <div class="control-input-card">
+                <div class="card-label-small">
+                    <span>স্পিন বেট (Total Bet)</span>
+                    <span style="color:#2ecc71;">MIN ৳10</span>
+                </div>
+                <div class="stepper-amount-flex">
+                    <button class="btn-stepper-square" onclick="adjustBet(-50)">-</button>
+                    <input type="number" id="spinBetInput" class="bet-display-field" value="50">
+                    <button class="btn-stepper-square" onclick="adjustBet(50)">+</button>
+                </div>
+            </div>
+
+            <!-- Active Paylines -->
+            <div class="control-input-card">
+                <div class="card-label-small">
+                    <span>সক্রিয় লাইন</span>
+                    <span>1 - 5 LINES</span>
+                </div>
+                <div class="paylines-count-text">5 / 5 ACTIVE</div>
+            </div>
+        </div>
+
+        <!-- Quick Bet Chips -->
+        <div class="quick-chips-strip">
+            <div class="chip-bet-button" onclick="setBetValue(10)">10</div>
+            <div class="chip-bet-button" onclick="setBetValue(50)">50</div>
+            <div class="chip-bet-button" onclick="setBetValue(100)">100</div>
+            <div class="chip-bet-button" onclick="setBetValue(200)">200</div>
+            <div class="chip-bet-button" onclick="doubleBet()">2X</div>
+        </div>
+
+        <!-- Giant Manual Spin Button (Spins 2+ Seconds with Motion Blur) -->
+        <button class="btn-giant-spin" id="btnGiantSpin" onclick="handleSpinClick()">
+            <i class="fa-solid fa-play"></i> SPIN
+        </button>
+    </div>
+
+</div>
+
+<!-- ======================================================== -->
+<!-- TOP HEADER HISTORY MODAL                                 -->
+<!-- ======================================================== -->
+<div class="history-modal-curtain" id="historyModal">
+    <div class="history-card-body">
+        <div class="history-modal-head">
+            <h4><i class="fa-solid fa-clock-rotate-left"></i> স্লট গেম হিস্টোরি</h4>
+            <div class="btn-close-circle" onclick="closeHistoryModal()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <div class="history-records-scroll" id="historyRecordsScroll">
+            <p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px;">এখনো কোনো স্পিন রেকর্ড নেই।</p>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- PAYTABLE & MULTIPLIER RULES MODAL                        -->
+<!-- ======================================================== -->
+<div class="history-modal-curtain" id="paytableModal">
+    <div class="history-card-body">
+        <div class="history-modal-head">
+            <h4><i class="fa-solid fa-table-cells"></i> ৩ডি পে-টেবিল ও গুণক</h4>
+            <div class="btn-close-circle" onclick="closePaytableModal()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <p style="font-size:11.5px; color:#cbd5e1; margin-bottom:12px; line-height:1.4;">
+            যেকোনো সক্রিয় পে-লাইনে ৩টি একই সিম্বল মিললে পে-আউট দেওয়া হবে:
+        </p>
+        <div class="paytable-grid-list">
+            <div class="pay-symbol-item"><span>3D Lucky 7</span><strong>100X</strong></div>
+            <div class="pay-symbol-item"><span>3D Diamond</span><strong>50X</strong></div>
+            <div class="pay-symbol-item"><span>3D Crown</span><strong>25X</strong></div>
+            <div class="pay-symbol-item"><span>3D Gold BAR</span><strong>15X</strong></div>
+            <div class="pay-symbol-item"><span>3D Liberty Bell</span><strong>10X</strong></div>
+            <div class="pay-symbol-item"><span>3D Cherries</span><strong>5X</strong></div>
+            <div class="pay-symbol-item"><span>3D Horseshoe</span><strong>3X</strong></div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="slotsToast">
+    <i class="fa-solid fa-circle-check" id="toastIcon" style="color:#ffd700; font-size:18px;"></i>
+    <span id="toastMsg">বিজ্ঞপ্তি বার্তা</span>
+</div>
+
+<!-- ======================================================== -->
+<!-- JAVASCRIPT MASTER CORE: 3D VECTOR SLOTS & 2+ SEC SPIN   -->
+<!-- ======================================================== -->
+<script>
+    /* ================= 1. FIREBASE CONFIG ================= */
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeAEYWjBUHi76W2s3dIvu41CEu1wuXYxk",
+        authDomain: "avatar-game-335d4.firebaseapp.com",
+        projectId: "avatar-game-335d4",
+        storageBucket: "avatar-game-335d4.firebasestorage.app",
+        messagingSenderId: "848880921478",
+        appId: "1:848880921478:web:74461e00fe8a3edc129a07",
+        measurementId: "G-ST38JDVKQ4",
+        databaseURL: "https://avatar-game-335d4-default-rtdb.firebaseio.com"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    /* ================= 2. USER AUTH & SESSION ================= */
+    let currentUser = JSON.parse(localStorage.getItem('dk_active_user')) || null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const qUID = urlParams.get('uid');
+
+    if (qUID) {
+        if (!currentUser || currentUser.uid !== qUID) {
+            currentUser = { uid: qUID, balance: parseFloat(urlParams.get('bal') || 0), username: 'MEMBER' + qUID };
+            localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        }
+    }
+
+    if (currentUser && currentUser.uid) {
+        bindUserBalance();
+        loadHistoryFromFirebase();
+    } else {
+        currentUser = { uid: "1001", username: "GuestUser", balance: 5000.00, wagerDone: 0, totalWagered: 0 };
+        localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        bindUserBalance();
+    }
+
+    function bindUserBalance() {
+        if (!currentUser || !currentUser.uid) return;
+        db.ref('users/' + currentUser.uid).on('value', snap => {
+            if (snap.exists()) {
+                const u = snap.val();
+                currentUser.balance = parseFloat(u.balance || 0);
+                currentUser.wagerDone = parseFloat(u.wagerDone || 0);
+                currentUser.totalWagered = parseFloat(u.totalWagered || 0);
+                updateBalanceUI();
+            }
+        });
+        updateBalanceUI();
+    }
+
+    function updateBalanceUI() {
+        if (!currentUser) return;
+        document.getElementById('slotsBalanceVal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
+    }
+
+    function exitToLobby() {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ action: 'closeGame' }, '*');
+        }
+        window.location.href = 'index.html';
+    }
+
+    /* ================= 3. AUDIO SYNTH ENGINE ================= */
+    class SlotsAudioEngine {
+        constructor() {
+            this.ctx = null;
+            this.enabled = true;
+        }
+        init() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+        }
+        playReelStop() {
+            if (!this.enabled) return;
+            this.init();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.1);
+        }
+        playWin() {
+            if (!this.enabled) return;
+            this.init();
+            const now = this.ctx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                gain.gain.setValueAtTime(0.22, now + idx * 0.09);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.09 + 0.28);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now + idx * 0.09);
+                osc.stop(now + idx * 0.09 + 0.28);
+            });
+        }
+        playSpinTick() {
+            if (!this.enabled) return;
+            this.init();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(700, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.03);
+        }
+    }
+    const slotsAudio = new SlotsAudioEngine();
+
+    function toggleSound() {
+        slotsAudio.enabled = !slotsAudio.enabled;
+        const icon = document.getElementById('soundIcon');
+        const btn = document.getElementById('btnSoundToggle');
+        if (slotsAudio.enabled) {
+            btn.classList.add('active');
+            icon.className = 'fa-solid fa-volume-high';
+            showToast('সাউন্ড চালু হয়েছে');
+        } else {
+            btn.classList.remove('active');
+            icon.className = 'fa-solid fa-volume-xmark';
+            showToast('সাউন্ড বন্ধ হয়েছে');
+        }
+    }
+
+    /* ======================================================== */
+    /* 4. CUSTOM 3D VECTOR GRAPHICS (NO RAW EMOJIS)             */
+    /* ======================================================== */
+    const SYMBOLS_3D = [
+        {
+            id: 'seven',
+            name: 'Lucky 7',
+            mult: 100,
+            weight: 2,
+            svg: `
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="gold7" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fff6a9"/>
+                        <stop offset="50%" stop-color="#f59e0b"/>
+                        <stop offset="100%" stop-color="#b45309"/>
+                    </linearGradient>
+                    <linearGradient id="rubyInlay" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ff1744"/>
+                        <stop offset="100%" stop-color="#990019"/>
+                    </linearGradient>
+                </defs>
+                <!-- 3D Bevel Edge -->
+                <path d="M15 20 L85 20 L50 90 L32 90 L62 35 L15 35 Z" fill="#78350f" transform="translate(3, 4)"/>
+                <path d="M15 20 L85 20 L50 90 L32 90 L62 35 L15 35 Z" fill="url(#gold7)" stroke="#ffd700" stroke-width="2"/>
+                <path d="M22 24 L78 24 L48 84 L38 84 L64 31 L22 31 Z" fill="url(#rubyInlay)"/>
+            </svg>`
+        },
+        {
+            id: 'diamond',
+            name: 'Diamond',
+            mult: 50,
+            weight: 4,
+            svg: `
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="diamGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#67e8f9"/>
+                        <stop offset="100%" stop-color="#0891b2"/>
+                    </linearGradient>
+                    <linearGradient id="diamGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#a5f3fc"/>
+                        <stop offset="100%" stop-color="#06b6d4"/>
+                    </linearGradient>
+                </defs>
+                <polygon points="20,40 50,15 80,40 50,85" fill="#0e7490" transform="translate(2, 4)"/>
+                <!-- Upper Facets -->
+                <polygon points="20,40 35,20 65,20 80,40" fill="url(#diamGrad1)"/>
+                <polygon points="35,20 50,40 65,20" fill="url(#diamGrad2)"/>
+                <polygon points="20,40 35,20 50,40" fill="#0891b2"/>
+                <polygon points="80,40 65,20 50,40" fill="#06b6d4"/>
+                <!-- Lower Facets -->
+                <polygon points="20,40 50,40 50,85" fill="#0891b2"/>
+                <polygon points="80,40 50,40 50,85" fill="url(#diamGrad2)"/>
+            </svg>`
+        },
+        {
+            id: 'crown',
+            name: 'Crown',
+            mult: 25,
+            weight: 6,
+            svg: `
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="crownGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fef08a"/>
+                        <stop offset="50%" stop-color="#eab308"/>
+                        <stop offset="100%" stop-color="#854d0e"/>
+                    </linearGradient>
+                </defs>
+                <path d="M15 75 L15 35 L35 55 L50 25 L65 55 L85 35 L85 75 Z" fill="#713f12" transform="translate(2, 3)"/>
+                <path d="M15 75 L15 35 L35 55 L50 25 L65 55 L85 35 L85 75 Z" fill="url(#crownGold)" stroke="#ffd700" stroke-width="2"/>
+                <circle cx="50" cy="25" r="4" fill="#ff1744"/>
+                <circle cx="15" cy="35" r="3.5" fill="#3b82f6"/>
+                <circle cx="85" cy="35" r="3.5" fill="#3b82f6"/>
+                <rect x="20" y="66" width="60" height="6" rx="3" fill="#dc2626"/>
+            </svg>`
+        },
+        {
+            id: 'bar',
+            name: 'Gold BAR',
+            mult: 15,
+            weight: 8,
+            svg: `
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="barGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fef08a"/>
+                        <stop offset="40%" stop-color="#f59e0b"/>
+                        <stop offset="100%" stop-color="#78350f"/>
+                    </linearGradient>
+                </defs>
+                <rect x="12" y="32" width="76" height="40" rx="8" fill="#451a03" transform="translate(2, 3)"/>
+                <rect x="12" y="32" width="76" height="40" rx="8" fill="url(#barGold)" stroke="#ffd700" stroke-width="2"/>
+                <rect x="18" y="38" width="64" height="28" rx="5" fill="#78350f"/>
+                <text x="50" y="58" font-family="'Cinzel', serif" font-weight="900" font-size="20" fill="#ffd700" text-anchor="middle" letter-spacing="2">BAR</text>
+            </svg>`
+        },
+        {
+            id: 'bell',
+            name: 'Liberty Bell',
+            mult: 10,
+            weight: 12,
+            svg: `
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="bellGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fef9c3"/>
+                        <stop offset="50%" stop-color="#eab308"/>
+                        <stop offset="100%" stop-color="#713f12"/>
+                    </linearGradient>
+                </defs>
+                <path d="M40 18 Q50 12 60 18 L64 26 Q75 55 82 66 L18 66 Q25 55 36 26 Z" fill="#451a03" transform="translate(2, 3)"/>
+                <path d="M40 18 Q50 12 60 18 L64 26 Q75 55 82 66 L18 66 Q25 55 36 26 Z" fill="url(#bellGold)" stroke="#ffd700" stroke-width="1.5"/>
+                <ellipse cx="50" cy="66" rx="34" ry="7" fill="#ca8a04"/>
+                <circle cx="50" cy="74" r="6" fill="#713f12"/>
+            </svg>`
+        },
+        {
+            id: 'cherry',
+            name: 'Ruby Cherries',
+            mult: 5,
+            weight: 18,
+            svg: `
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <radialGradient id="cherryRed" cx="35%" cy="35%">
+                        <stop offset="0%" stop-color="#ff4d6d"/>
+                        <stop offset="60%" stop-color="#c9184a"/>
+                        <stop offset="100%" stop-color="#590d22"/>
+                    </radialGradient>
+                </defs>
+                <!-- Stems -->
+                <path d="M35 55 Q45 25 70 18 Q55 25 60 55" fill="none" stroke="#65a30d" stroke-width="4" stroke-linecap="round"/>
+                <!-- Leaf -->
+                <path d="M68 20 Q85 15 80 28 Q68 28 68 20 Z" fill="#84cc16"/>
+                <!-- Twin Cherries -->
+                <circle cx="35" cy="62" r="18" fill="url(#cherryRed)"/>
+                <circle cx="65" cy="62" r="18" fill="url(#cherryRed)"/>
+                <circle cx="30" cy="56" r="4" fill="#ffffff" opacity="0.6"/>
+                <circle cx="60" cy="56" r="4" fill="#ffffff" opacity="0.6"/>
+            </svg>`
+        },
+        {
+            id: 'horseshoe',
+            name: 'Lucky Horseshoe',
+            mult: 3,
+            weight: 26,
+            svg: `
+            <svg viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="hsGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fef08a"/>
+                        <stop offset="50%" stop-color="#eab308"/>
+                        <stop offset="100%" stop-color="#854d0e"/>
+                    </linearGradient>
+                </defs>
+                <path d="M22 22 L36 22 Q34 68 50 68 Q66 68 64 22 L78 22 Q82 86 50 86 Q18 86 22 22 Z" fill="#451a03" transform="translate(2, 3)"/>
+                <path d="M22 22 L36 22 Q34 68 50 68 Q66 68 64 22 L78 22 Q82 86 50 86 Q18 86 22 22 Z" fill="url(#hsGold)" stroke="#ffd700" stroke-width="1.5"/>
+                <!-- Nail Studs -->
+                <circle cx="28" cy="40" r="2.5" fill="#451a03"/>
+                <circle cx="29" cy="58" r="2.5" fill="#451a03"/>
+                <circle cx="72" cy="40" r="2.5" fill="#451a03"/>
+                <circle cx="71" cy="58" r="2.5" fill="#451a03"/>
+            </svg>`
+        }
+    ];
+
+    const PAYLINES = [
+        [ [0,0], [1,0], [2,0] ], // Top row
+        [ [0,1], [1,1], [2,1] ], // Mid row
+        [ [0,2], [1,2], [2,2] ], // Bottom row
+        [ [0,0], [1,1], [2,2] ], // Diagonal 1
+        [ [0,2], [1,1], [2,0] ]  // Diagonal 2
+    ];
+
+    let isSpinning = false;
+    let activeSpinBet = 50;
+    let currentGrid = [
+        ['seven', 'diamond', 'crown'],
+        ['bar', 'seven', 'bell'],
+        ['cherry', 'horseshoe', 'seven']
+    ];
+
+    function pickWeightedSymbol() {
+        const totalWeight = SYMBOLS_3D.reduce((acc, s) => acc + s.weight, 0);
+        let rand = Math.random() * totalWeight;
+        for (const s of SYMBOLS_3D) {
+            if (rand < s.weight) return s;
+            rand -= s.weight;
+        }
+        return SYMBOLS_3D[SYMBOLS_3D.length - 1];
+    }
+
+    function initReels() {
+        for (let reel = 0; reel < 3; reel++) {
+            renderReelColumn(reel, currentGrid[reel]);
+        }
+    }
+
+    function renderReelColumn(reelIdx, symIds) {
+        const strip = document.getElementById(`reelStrip${reelIdx}`);
+        strip.innerHTML = '';
+        strip.style.transform = 'translateY(0px)';
+
+        symIds.forEach((id, rowIdx) => {
+            const sym = SYMBOLS_3D.find(s => s.id === id) || SYMBOLS_3D[0];
+            const cell = document.createElement('div');
+            cell.className = 'slot-symbol-cell';
+            cell.id = `cell_${reelIdx}_${rowIdx}`;
+            cell.innerHTML = sym.svg;
+            strip.appendChild(cell);
+        });
+    }
+
+    function adjustBet(delta) {
+        if (isSpinning) return;
+        const input = document.getElementById('spinBetInput');
+        let val = (parseInt(input.value) || 50) + delta;
+        val = Math.max(10, val);
+        input.value = val;
+        activeSpinBet = val;
+    }
+
+    function setBetValue(val) {
+        if (isSpinning) return;
+        document.getElementById('spinBetInput').value = val;
+        activeSpinBet = val;
+    }
+
+    function doubleBet() {
+        if (isSpinning) return;
+        const input = document.getElementById('spinBetInput');
+        let val = (parseInt(input.value) || 50) * 2;
+        input.value = val;
+        activeSpinBet = val;
+    }
+
+    /* ======================================================== */
+    /* 5. 2+ SECONDS CONTINUOUS SPIN PHYSICS & SOUNDS           */
+    /* ======================================================== */
+    function handleSpinClick() {
+        if (isSpinning) return;
+        activeSpinBet = parseFloat(document.getElementById('spinBetInput').value) || 50;
+
+        if (!currentUser || (currentUser.balance || 0) < activeSpinBet) {
+            showToast('আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!', true);
+            return;
+        }
+
+        // Deduct Balance Immediately
+        const newBal = parseFloat((currentUser.balance - activeSpinBet).toFixed(2));
+        const newWager = parseFloat(((currentUser.wagerDone || 0) + activeSpinBet).toFixed(2));
+        const newTotalWager = parseFloat(((currentUser.totalWagered || 0) + activeSpinBet).toFixed(2));
+
+        currentUser.balance = newBal;
+        currentUser.wagerDone = newWager;
+        currentUser.totalWagered = newTotalWager;
+        localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        updateBalanceUI();
+
+        db.ref('users/' + currentUser.uid).update({
+            balance: newBal,
+            wagerDone: newWager,
+            totalWagered: newTotalWager
+        }).catch(() => {});
+
+        clearPreviousWinEffects();
+        isSpinning = true;
+        document.getElementById('btnGiantSpin').classList.add('spinning');
+
+        // Pre-determine Target 3x3 Grid
+        const targetGrid = [
+            [ pickWeightedSymbol().id, pickWeightedSymbol().id, pickWeightedSymbol().id ],
+            [ pickWeightedSymbol().id, pickWeightedSymbol().id, pickWeightedSymbol().id ],
+            [ pickWeightedSymbol().id, pickWeightedSymbol().id, pickWeightedSymbol().id ]
+        ];
+
+        // Animate Continuous Spin (At least 2.2 to 3.2 seconds duration)
+        animateContinuousReelSpin(targetGrid);
+    }
+
+    function animateContinuousReelSpin(targetGrid) {
+        // Minimum 2.2 seconds for Reel 1, 2.7s for Reel 2, 3.2s for Reel 3!
+        const stopTimes = [2200, 2700, 3200];
+
+        for (let reel = 0; reel < 3; reel++) {
+            const strip = document.getElementById(`reelStrip${reel}`);
+            
+            // Build a long strip of 30+ 3D symbols to ensure authentic motion blur spin
+            let spinChain = [];
+            for (let i = 0; i < 30; i++) {
+                spinChain.push(pickWeightedSymbol().id);
+            }
+            // Attach final landing targets at the tail
+            spinChain = spinChain.concat(targetGrid[reel]);
+
+            strip.innerHTML = '';
+            spinChain.forEach(id => {
+                const sym = SYMBOLS_3D.find(s => s.id === id) || SYMBOLS_3D[0];
+                const cell = document.createElement('div');
+                cell.className = 'slot-symbol-cell';
+                cell.innerHTML = sym.svg;
+                strip.appendChild(cell);
+            });
+
+            const stopDelay = stopTimes[reel];
+            const totalShiftY = (spinChain.length - 3) * 85;
+
+            // Apply high-velocity motion blur transition & mechanical deceleration
+            strip.style.transition = `transform ${stopDelay}ms cubic-bezier(0.12, 0.8, 0.28, 1.02)`;
+            strip.style.transform = `translateY(-${totalShiftY}px)`;
+
+            setTimeout(() => {
+                slotsAudio.playReelStop();
+                if (reel === 2) {
+                    currentGrid = targetGrid;
+                    finishSpinSequence();
+                }
+            }, stopDelay);
+        }
+    }
+
+    function finishSpinSequence() {
+        isSpinning = false;
+        document.getElementById('btnGiantSpin').classList.remove('spinning');
+
+        // Check Paylines
+        const wins = evaluateLines(currentGrid);
+        const spinRoundId = 'SL-' + Date.now().toString().slice(-6);
+
+        if (wins.length > 0) {
+            let totalWin = 0;
+            wins.forEach(w => {
+                const lineBet = activeSpinBet / 5;
+                totalWin += lineBet * w.mult;
+
+                // Highlight winning 3D cells
+                w.coords.forEach(([r, c]) => {
+                    const strip = document.getElementById(`reelStrip${r}`);
+                    const cells = strip.querySelectorAll('.slot-symbol-cell');
+                    const targetCell = cells[cells.length - 3 + c];
+                    if (targetCell) targetCell.classList.add('symbol-win-highlight');
+                });
+            });
+
+            totalWin = parseFloat(totalWin.toFixed(2));
+
+            // Credit Balance
+            const updatedBal = parseFloat((currentUser.balance + totalWin).toFixed(2));
+            currentUser.balance = updatedBal;
+            localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+            updateBalanceUI();
+
+            db.ref('users/' + currentUser.uid).update({ balance: updatedBal }).catch(() => {});
+
+            slotsAudio.playWin();
+            document.getElementById('lastWinDisplay').innerText = totalWin.toFixed(2);
+            document.getElementById('winAnnouncementNotice').innerText = `🎉 WIN: ৳${totalWin.toFixed(2)} (${wins.length} LINES)`;
+
+            recordGameHistory(spinRoundId, activeSpinBet, totalWin, true, wins.length);
+            showToast(`বিশাল জয়! ৳${totalWin.toFixed(2)} জিতেছেন!`);
+        } else {
+            document.getElementById('winAnnouncementNotice').innerText = '';
+            recordGameHistory(spinRoundId, activeSpinBet, 0, false, 0);
+        }
+    }
+
+    function evaluateLines(grid) {
+        const hits = [];
+        PAYLINES.forEach((coords, idx) => {
+            const sym0 = grid[coords[0][0]][coords[0][1]];
+            const sym1 = grid[coords[1][0]][coords[1][1]];
+            const sym2 = grid[coords[2][0]][coords[2][1]];
+
+            if (sym0 === sym1 && sym1 === sym2) {
+                const conf = SYMBOLS_3D.find(s => s.id === sym0);
+                if (conf) {
+                    hits.push({
+                        lineIndex: idx,
+                        coords: coords,
+                        mult: conf.mult,
+                        name: conf.name
+                    });
+                }
+            }
+        });
+        return hits;
+    }
+
+    function clearPreviousWinEffects() {
+        document.querySelectorAll('.slot-symbol-cell').forEach(c => c.classList.remove('symbol-win-highlight'));
+        document.getElementById('winAnnouncementNotice').innerText = '';
+    }
+
+    /* ======================================================== */
+    /* 6. HISTORY MODAL SYSTEM & FIREBASE PERSISTENCE           */
+    /* ======================================================== */
+    function openHistoryModal() {
+        document.getElementById('historyModal').style.display = 'flex';
+    }
+    function closeHistoryModal() {
+        document.getElementById('historyModal').style.display = 'none';
+    }
+
+    function openPaytableModal() {
+        document.getElementById('paytableModal').style.display = 'flex';
+    }
+    function closePaytableModal() {
+        document.getElementById('paytableModal').style.display = 'none';
+    }
+
+    function recordGameHistory(roundId, bet, payout, isWin, lines) {
+        if (!currentUser || !currentUser.uid) return;
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+        const rec = {
+            roundId: roundId,
+            game: 'Mega 777 Slots',
+            bet: bet,
+            payout: payout,
+            win: isWin,
+            lines: lines,
+            time: now,
+            timestamp: Date.now()
+        };
+
+        db.ref(`users/${currentUser.uid}/gameHistory`).push().set(rec).catch(() => {});
+        prependHistoryRow(rec);
+    }
+
+    function loadHistoryFromFirebase() {
+        if (!currentUser || !currentUser.uid) return;
+        db.ref(`users/${currentUser.uid}/gameHistory`).orderByChild('timestamp').limitToLast(15).once('value', snap => {
+            if (!snap.exists()) return;
+            const container = document.getElementById('historyRecordsScroll');
+            container.innerHTML = '';
+            const list = [];
+            snap.forEach(c => list.push(c.val()));
+            list.reverse().forEach(r => {
+                if (r.game === 'Mega 777 Slots') prependHistoryRow(r);
+            });
+        });
+    }
+
+    function prependHistoryRow(rec) {
+        const container = document.getElementById('historyRecordsScroll');
+        if (!container) return;
+        if (container.querySelector('p')) container.innerHTML = '';
+
+        const row = document.createElement('div');
+        row.className = 'history-item-row';
+        row.innerHTML = `
+            <div>
+                <strong style="color:#ffd700;">#${rec.roundId || 'SLOT'}</strong>
+                <div style="font-size:10px; color:#94a3b8; margin-top:2px;">বেট: ৳${rec.bet} (${rec.lines || 0} Lines)</div>
+            </div>
+            <div style="text-align:right;">
+                <strong style="color:${rec.win ? '#2ecc71' : '#ef4444'}; font-size:13.5px;">${rec.win ? '+৳' + rec.payout.toFixed(2) : '-৳' + rec.bet}</strong>
+                <div style="font-size:9.5px; color:#94a3b8; margin-top:2px;">${rec.time.slice(11)}</div>
+            </div>
+        `;
+        container.prepend(row);
+    }
+
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('slotsToast');
+        const text = document.getElementById('toastMsg');
+        const icon = document.getElementById('toastIcon');
+
+        text.innerText = msg;
+        icon.className = isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
+        icon.style.color = isError ? '#ff1744' : '#ffd700';
+
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    /* Start Reels */
+    window.addEventListener('DOMContentLoaded', () => {
+        initReels();
+    });
+</script>
+
+</body>
+</html>

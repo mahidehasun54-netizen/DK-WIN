@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mines Master Pro - Crystal Edition</title>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=Hind+Siliguri:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-crystal: #f3f5f9;
+            --card-white: #ffffff;
+            --border-soft: #e2e8f0;
+            --gem-green: #00c853;
+            --gem-glow: rgba(0, 200, 83, 0.45);
+            --bomb-red: #ff1744;
+            --bomb-glow: rgba(255, 23, 68, 0.5);
+            --gold-primary: #f59e0b;
+            --gold-gradient: linear-gradient(135deg, #fbc02d, #f59e0b);
+            --primary-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%);
+            --cashout-gradient: linear-gradient(180deg, #ffb300 0%, #f57c00 100%);
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background-color: #cbd5e1; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+
+        .mines-app-wrapper { width: 100%; max-width: 480px; min-height: 100vh; background: var(--bg-crystal); position: relative; box-shadow: 0 15px 45px rgba(0,0,0,0.15); overflow-x: hidden; display: flex; flex-direction: column; color: var(--text-dark); padding-bottom: 35px; }
+
+        /* Top Luxury Navbar */
+        .mines-navbar { background: var(--primary-gradient); padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; color: #fff; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(225, 29, 72, 0.25); }
+        .nav-back-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.22); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; color: #fff; transition: transform 0.15s; }
+        .nav-back-circle:active { transform: scale(0.92); }
+        .mines-nav-title { font-size: 18px; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 7px; color: #fff; }
+        .mines-nav-title span { color: #fbc02d; }
+        
+        .nav-actions-right { display: flex; align-items: center; gap: 8px; }
+        .nav-icon-bubble { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; color: #fff; transition: transform 0.15s; }
+        .nav-icon-bubble:active { transform: scale(0.92); }
+
+        /* Balance Card */
+        .mines-balance-card { background: var(--card-white); margin: 12px 14px 10px 14px; border-radius: 18px; padding: 14px 18px; box-shadow: var(--card-shadow); border: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center; }
+        .bal-meta-box { display: flex; flex-direction: column; gap: 2px; }
+        .bal-title-row { font-size: 11.5px; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .bal-display-amount { font-size: 24px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
+        .bal-display-amount span { color: var(--gem-green); }
+        .btn-sync-reload { color: var(--text-muted); cursor: pointer; font-size: 12px; transition: transform 0.35s ease; }
+        .btn-sync-reload:active { transform: rotate(180deg); }
+        .btn-quick-deposit { background: var(--gold-gradient); color: #111; font-size: 11.5px; font-weight: 900; padding: 7px 16px; border-radius: 25px; border: none; cursor: pointer; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3); }
+
+        /* HUD Live Multiplier Strip */
+        .hud-stats-bar { margin: 0 14px 10px 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .hud-metric-card { background: var(--card-white); border: 1px solid var(--border-soft); border-radius: 14px; padding: 8px 6px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .hud-metric-card span { font-size: 10px; font-weight: 800; color: var(--text-muted); display: block; text-transform: uppercase; }
+        .hud-metric-card strong { font-size: 15px; font-weight: 900; color: #0f172a; display: block; margin-top: 2px; }
+        .hud-metric-card strong.green-text { color: var(--gem-green); }
+        .hud-metric-card strong.gold-text { color: var(--gold-primary); }
+
+        /* ======================================================== */
+        /* 5x5 MINES BOARD (CRYSTAL WHITE & NEON LIGHTING)          */
+        /* ======================================================== */
+        .board-crystal-stage { margin: 0 14px 14px 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 22px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); position: relative; }
+        
+        .tiles-grid-5x5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; aspect-ratio: 1; }
+        
+        .crystal-tile {
+            background: linear-gradient(145deg, #ffffff 0%, #eef2f7 100%);
+            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            position: relative;
+            perspective: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+            transition: transform 0.1s, border-color 0.15s, box-shadow 0.15s;
+        }
+        .crystal-tile:hover { border-color: #cbd5e1; box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+        .crystal-tile:active { transform: scale(0.93); }
+        .crystal-tile.tile-locked { pointer-events: none; }
+
+        .tile-flipper-3d {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tile-flipper-3d.flipped { transform: rotateY(180deg); }
+
+        .tile-front-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tile-front-face::after {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #cbd5e1 30%, transparent 70%);
+        }
+
+        .tile-back-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* GEM STATE (CRYSTAL EMERALD) */
+        .tile-back-face.is-gem-win {
+            background: radial-gradient(circle, #e8f5e9 30%, #c8e6c9 100%);
+            border: 2px solid var(--gem-green);
+            box-shadow: 0 0 20px var(--gem-glow);
+        }
+        .gem-3d-symbol {
+            font-size: 28px;
+            color: var(--gem-green);
+            filter: drop-shadow(0 0 10px rgba(0, 200, 83, 0.6));
+            animation: gemBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes gemBounce {
+            0% { transform: scale(0.2); opacity: 0; }
+            60% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        /* BOMB STATE (RUBY EXPLOSION) */
+        .tile-back-face.is-bomb-hit {
+            background: radial-gradient(circle, #ffebee 30%, #ffcdd2 100%);
+            border: 2px solid var(--bomb-red);
+            box-shadow: 0 0 25px var(--bomb-glow);
+        }
+        .bomb-3d-symbol {
+            font-size: 28px;
+            color: var(--bomb-red);
+            filter: drop-shadow(0 0 12px rgba(255, 23, 68, 0.7));
+            animation: bombShock 0.45s ease-out;
+        }
+        @keyframes bombShock {
+            0% { transform: scale(0.2) rotate(-30deg); }
+            50% { transform: scale(1.35) rotate(20deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .tile-back-face.is-dimmed-reveal {
+            opacity: 0.35;
+            background: #f1f5f9;
+            border: 1.5px dashed #cbd5e1;
+        }
+
+        /* Screen Shake Effect */
+        .shake-trigger { animation: tableShock 0.45s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes tableShock {
+            10%, 90% { transform: translate3d(-3px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* ======================================================== */
+        /* CONTROLLER DOCK & CUSTOM MINES SELECTOR                  */
+        /* ======================================================== */
+        .mines-control-box { background: var(--card-white); margin: 0 14px 14px 14px; border-radius: 20px; padding: 16px; border: 1px solid var(--border-soft); box-shadow: var(--card-shadow); }
+
+        .control-input-row { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; margin-bottom: 12px; }
+        .control-group-node { background: #f8fafc; border: 1.5px solid var(--border-soft); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between; }
+        .control-group-title { font-size: 10.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 3px; display: flex; justify-content: space-between; }
+        
+        .stepper-flex-row { display: flex; align-items: center; justify-content: space-between; }
+        .btn-stepper-round { width: 30px; height: 30px; border-radius: 8px; border: none; background: #e2e8f0; color: #0f172a; font-size: 15px; font-weight: 900; cursor: pointer; }
+        .btn-stepper-round:active { background: #cbd5e1; }
+        .bet-number-input { width: 75px; background: transparent; border: none; text-align: center; font-size: 16px; font-weight: 900; color: #0f172a; outline: none; }
+        
+        .mines-current-display { font-size: 17px; font-weight: 900; color: var(--bomb-red); text-align: center; }
+
+        /* CUSTOM MINES SELECTOR SLIDER & CHIPS */
+        .custom-mines-selector-strip { margin-bottom: 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 10px 12px; }
+        .mines-slider-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
+        .mines-slider-input { width: 100%; accent-color: var(--bomb-red); cursor: pointer; }
+        .mines-quick-chips { display: flex; justify-content: space-between; gap: 5px; margin-top: 8px; }
+        .chip-mine-opt { flex: 1; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 4px 0; text-align: center; font-size: 11px; font-weight: 800; color: var(--text-dark); cursor: pointer; transition: all 0.15s; }
+        .chip-mine-opt.active { background: var(--bomb-red); color: #fff; border-color: var(--bomb-red); }
+
+        /* Quick Bet Multipliers */
+        .bet-chips-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 14px; }
+        .chip-bet-pill { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 6px 0; text-align: center; font-size: 11.5px; font-weight: 800; color: var(--text-dark); cursor: pointer; }
+        .chip-bet-pill:active { background: #e2e8f0; }
+
+        /* MAIN ACTION BUTTON */
+        .btn-action-trigger { width: 100%; padding: 13px; border: none; border-radius: 25px; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.15s; }
+        .btn-action-trigger:active { transform: scale(0.98); }
+        
+        .btn-mode-bet { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.35); }
+        .btn-mode-cashout { background: var(--cashout-gradient); color: #111; box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); animation: pulseCashout 1.2s infinite alternate; }
+        @keyframes pulseCashout { from { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); } to { box-shadow: 0 0 30px rgba(245, 158, 11, 0.85); } }
+
+        .btn-random-pick-pill { width: 100%; margin-top: 8px; background: #f8fafc; border: 1.5px solid #e2e8f0; color: var(--text-muted); border-radius: 20px; padding: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 6px; }
+
+        /* ======================================================== */
+        /* TOP HEADER HISTORY MODAL                                 */
+        /* ======================================================== */
+        .history-modal-curtain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 18px; }
+        .history-modal-card { background: #ffffff; border-radius: 22px; width: 100%; max-width: 380px; padding: 18px 20px; box-shadow: 0 20px 45px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: 80vh; animation: modalPop 0.25s ease-out; }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        
+        .modal-head-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px; }
+        .modal-title-text { font-size: 15px; font-weight: 900; color: var(--text-dark); display: flex; align-items: center; gap: 6px; }
+        .btn-modal-close { width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; border: none; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+        
+        .history-items-scroll { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 2px; }
+        .history-log-row { background: #f8fafc; border: 1.5px solid var(--border-soft); border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+
+        /* Toast */
+        #minesToast { position: fixed; top: -90px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 400px; background: #0f172a; color: #ffffff; border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; z-index: 100000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-left: 5px solid var(--gold-primary); transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); font-size: 12.5px; font-weight: 700; }
+        #minesToast.show { top: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="mines-app-wrapper" id="minesWrapper">
+
+    <!-- Top Luxury Navbar -->
+    <div class="mines-navbar">
+        <div class="nav-back-circle" onclick="exitToLobby()" title="হোমে ফিরে যান">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+        <div class="mines-nav-title">
+            <i class="fa-solid fa-diamond" style="color:#fbc02d;"></i> Mines <span>Master</span>
+        </div>
+        <div class="nav-actions-right">
+            <!-- Top History Button -->
+            <div class="nav-icon-bubble" onclick="openHistoryModal()" title="হিস্টোরি দেখুন">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <!-- Sound Toggle -->
+            <div class="nav-icon-bubble" id="btnSoundToggle" onclick="toggleSound()">
+                <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Elevated Balance Card -->
+    <div class="mines-balance-card">
+        <div class="bal-meta-box">
+            <div class="bal-title-row">
+                <i class="fa-solid fa-wallet" style="color:var(--gold-primary);"></i>
+                <span>ওয়ালেট মোট ব্যালেন্স</span>
+                <i class="fa-solid fa-arrows-rotate btn-sync-reload" onclick="syncUserBalance()"></i>
+            </div>
+            <div class="bal-display-amount">৳<span id="minesBalanceVal">0.00</span></div>
+        </div>
+        <button class="btn-quick-deposit" onclick="exitToLobby('deposit')">
+            <i class="fa-solid fa-plus"></i> ডিপোজিট
+        </button>
+    </div>
+
+    <!-- HUD Multiplier Strip -->
+    <div class="hud-stats-bar">
+        <div class="hud-metric-card">
+            <span>মাইনস</span>
+            <strong id="hudMinesCount" style="color:var(--bomb-red);">3</strong>
+        </div>
+        <div class="hud-metric-card">
+            <span>বর্তমান লাভ</span>
+            <strong class="green-text" id="hudCurrentMult">1.00x</strong>
+        </div>
+        <div class="hud-metric-card">
+            <span>পরবর্তী মাল্টিপ্লায়ার</span>
+            <strong class="gold-text" id="hudNextMult">1.12x</strong>
+        </div>
+    </div>
+
+    <!-- 5x5 Mines Board Stage (Crystal White Theme) -->
+    <div class="board-crystal-stage" id="boardStage">
+        <div class="tiles-grid-5x5" id="minesGrid">
+            <!-- 25 Tiles Generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Controller Dock with Custom Mines Selector -->
+    <div class="mines-control-box">
+        <div class="control-input-row">
+            <!-- Bet Amount Stepper -->
+            <div class="control-group-node">
+                <div class="control-group-title">
+                    <span>বেট পরিমাণ (৳)</span>
+                    <span style="color:var(--gem-green);">MIN ৳10</span>
+                </div>
+                <div class="stepper-flex-row">
+                    <button class="btn-stepper-round" onclick="adjustBet(-50)">-</button>
+                    <input type="number" id="betInputBox" class="bet-number-input" value="100">
+                    <button class="btn-stepper-round" onclick="adjustBet(50)">+</button>
+                </div>
+            </div>
+
+            <!-- Mines Count Active View -->
+            <div class="control-group-node">
+                <div class="control-group-title">
+                    <span>বোমা (Mines)</span>
+                    <span>1 - 24</span>
+                </div>
+                <div class="mines-current-display"><span id="minesCountNumDisplay">3</span> 💣</div>
+            </div>
+        </div>
+
+        <!-- Custom Interactive Mines Selector Slider & Chips -->
+        <div class="custom-mines-selector-strip">
+            <div class="mines-slider-header">
+                <span>মাইন সংখ্যা নির্বাচন করুন:</span>
+                <strong style="color:var(--bomb-red); font-size:12px;"><span id="sliderValPreview">3</span> Mines</strong>
+            </div>
+            <input type="range" min="1" max="24" value="3" class="mines-slider-input" id="minesRangeSlider" oninput="onMinesSliderInput(this.value)">
+            <div class="mines-quick-chips">
+                <div class="chip-mine-opt" onclick="setMinesCountCustom(1)">1</div>
+                <div class="chip-mine-opt active" id="chipMines3" onclick="setMinesCountCustom(3)">3</div>
+                <div class="chip-mine-opt" onclick="setMinesCountCustom(5)">5</div>
+                <div class="chip-mine-opt" onclick="setMinesCountCustom(10)">10</div>
+                <div class="chip-mine-opt" onclick="setMinesCountCustom(24)">24</div>
+            </div>
+        </div>
+
+        <!-- Quick Bet Chips -->
+        <div class="bet-chips-row">
+            <div class="chip-bet-pill" onclick="setBetValue(50)">50</div>
+            <div class="chip-bet-pill" onclick="setBetValue(100)">100</div>
+            <div class="chip-bet-pill" onclick="setBetValue(200)">200</div>
+            <div class="chip-bet-pill" onclick="setBetValue(500)">500</div>
+            <div class="chip-bet-pill" onclick="doubleBet()">2X</div>
+        </div>
+
+        <!-- Main Action Button -->
+        <button id="btnMainAction" class="btn-action-trigger btn-mode-bet" onclick="handleMainAction()">
+            <span id="btnActionTitle">BET</span>
+            <span style="font-size:11px; font-weight:700; margin-top:1px;" id="btnActionSubtitle">৳100</span>
+        </button>
+
+        <!-- Random Pick Button -->
+        <button id="btnRandomPick" class="btn-random-pick-pill" onclick="pickRandomTile()">
+            <i class="fa-solid fa-shuffle"></i> র‍্যান্ডম টাইল বাছুন (Random Pick)
+        </button>
+    </div>
+
+</div>
+
+<!-- ======================================================== -->
+<!-- TOP HEADER HISTORY MODAL                                 -->
+<!-- ======================================================== -->
+<div class="history-modal-curtain" id="historyModal">
+    <div class="history-modal-card">
+        <div class="modal-head-row">
+            <div class="modal-title-text">
+                <i class="fa-solid fa-clock-rotate-left" style="color:var(--gold-primary);"></i>
+                <span>Mines Master হিস্টোরি</span>
+            </div>
+            <button class="btn-modal-close" onclick="closeHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="history-items-scroll" id="historyModalList">
+            <p style="text-align:center; color:#94a3b8; font-size:12px; padding:20px;">এখনো কোনো গেম রেকর্ড নেই।</p>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div id="minesToast">
+    <i class="fa-solid fa-circle-check" id="toastIcon" style="color:var(--gold-primary); font-size:18px;"></i>
+    <span id="toastMsg">বিজ্ঞপ্তি বার্তা</span>
+</div>
+
+<!-- ======================================================== -->
+<!-- JAVASCRIPT MASTER CORE: FAIR RTP & MULTIPLIER ENGINE     -->
+<!-- ======================================================== -->
+<script>
+    /* ================= 1. FIREBASE CONFIG ================= */
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeAEYWjBUHi76W2s3dIvu41CEu1wuXYxk",
+        authDomain: "avatar-game-335d4.firebaseapp.com",
+        projectId: "avatar-game-335d4",
+        storageBucket: "avatar-game-335d4.firebasestorage.app",
+        messagingSenderId: "848880921478",
+        appId: "1:848880921478:web:74461e00fe8a3edc129a07",
+        measurementId: "G-ST38JDVKQ4",
+        databaseURL: "https://avatar-game-335d4-default-rtdb.firebaseio.com"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    /* ================= 2. USER AUTH & SESSION ================= */
+    let currentUser = JSON.parse(localStorage.getItem('dk_active_user')) || null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const qUID = urlParams.get('uid');
+
+    if (qUID) {
+        if (!currentUser || currentUser.uid !== qUID) {
+            currentUser = { uid: qUID, balance: parseFloat(urlParams.get('bal') || 0), username: 'MEMBER' + qUID };
+            localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        }
+    }
+
+    if (currentUser && currentUser.uid) {
+        bindUserBalance();
+        loadPersistentHistoryFromFirebase();
+    } else {
+        currentUser = { uid: "1001", username: "GuestUser", balance: 5000.00, wagerDone: 0, totalWagered: 0 };
+        localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        bindUserBalance();
+    }
+
+    function bindUserBalance() {
+        if (!currentUser || !currentUser.uid) return;
+        db.ref('users/' + currentUser.uid).on('value', snap => {
+            if (snap.exists()) {
+                const u = snap.val();
+                currentUser.balance = parseFloat(u.balance || 0);
+                currentUser.wagerDone = parseFloat(u.wagerDone || 0);
+                currentUser.totalWagered = parseFloat(u.totalWagered || 0);
+                updateBalanceUI();
+            }
+        });
+        updateBalanceUI();
+    }
+
+    function syncUserBalance() {
+        if (!currentUser || !currentUser.uid) return;
+        showToast('ব্যালেন্স সিঙ্ক হচ্ছে...');
+        db.ref('users/' + currentUser.uid + '/balance').once('value', snap => {
+            if (snap.exists()) {
+                currentUser.balance = parseFloat(snap.val() || 0);
+                localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+                updateBalanceUI();
+                showToast('ব্যালেন্স আপডেট সফল!');
+            }
+        });
+    }
+
+    function updateBalanceUI() {
+        if (!currentUser) return;
+        document.getElementById('minesBalanceVal').innerText = parseFloat(currentUser.balance || 0).toFixed(2);
+    }
+
+    function exitToLobby(dest = '') {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ action: 'closeGame', destination: dest }, '*');
+        }
+        window.location.href = 'index.html' + (dest ? '#' + dest : '');
+    }
+
+    /* ================= 3. AUDIO ENGINE ================= */
+    class MinesAudioEngine {
+        constructor() {
+            this.ctx = null;
+            this.enabled = true;
+        }
+        init() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+        }
+        playTileClick() {
+            if (!this.enabled) return;
+            this.init();
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.05);
+        }
+        playGem(step = 1) {
+            if (!this.enabled) return;
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const baseFreq = Math.min(1350, 523.25 + (step * 50));
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(baseFreq, now);
+            osc.frequency.setValueAtTime(baseFreq * 1.5, now + 0.08);
+            gain.gain.setValueAtTime(0.22, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.28);
+        }
+        playBomb() {
+            if (!this.enabled) return;
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(160, now);
+            osc.frequency.exponentialRampToValueAtTime(25, now + 0.45);
+            gain.gain.setValueAtTime(0.45, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.45);
+        }
+        playCashout() {
+            if (!this.enabled) return;
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(587.33, now);
+            osc.frequency.setValueAtTime(880, now + 0.09);
+            osc.frequency.setValueAtTime(1174.66, now + 0.18);
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        }
+    }
+    const audio = new MinesAudioEngine();
+
+    function toggleSound() {
+        audio.enabled = !audio.enabled;
+        const icon = document.getElementById('soundIcon');
+        icon.className = audio.enabled ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+        showToast(audio.enabled ? 'সাউন্ড চালু হয়েছে' : 'সাউন্ড বন্ধ হয়েছে');
+    }
+
+    /* ======================================================== */
+    /* 4. MATHEMATICS & MULTIPLIER CORE                         */
+    /* ======================================================== */
+    const TOTAL_TILES = 25;
+    let isGameRunning = false;
+    let selectedMinesCount = 3;
+    let activeBetAmount = 100;
+    let currentGemsFound = 0;
+    let boardState = []; // true for bomb, false for gem
+    let revealedTiles = [];
+
+    // Industry Standard Multiplier with 2% House Margin
+    function calculateMinesMultiplier(mines, diamondsPicked) {
+        if (diamondsPicked <= 0) return 1.00;
+        let mult = 1.0;
+        for (let i = 0; i < diamondsPicked; i++) {
+            mult *= (TOTAL_TILES - i) / (TOTAL_TILES - mines - i);
+        }
+        mult = mult * 0.98; // 2% platform edge
+        return parseFloat(mult.toFixed(2));
+    }
+
+    function generateBoardTiles() {
+        const grid = document.getElementById('minesGrid');
+        grid.innerHTML = '';
+        for (let i = 0; i < TOTAL_TILES; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'crystal-tile tile-locked';
+            tile.id = `tile_${i}`;
+            tile.onclick = () => onTileClick(i);
+
+            tile.innerHTML = `
+                <div class="tile-flipper-3d" id="flipper_${i}">
+                    <div class="tile-front-face"></div>
+                    <div class="tile-back-face" id="back_${i}"></div>
+                </div>
+            `;
+            grid.appendChild(tile);
+        }
+    }
+
+    /* Custom Mines Selector Handlers */
+    function onMinesSliderInput(val) {
+        if (isGameRunning) return;
+        selectedMinesCount = parseInt(val);
+        updateMinesSelectorUI();
+    }
+
+    function setMinesCountCustom(val) {
+        if (isGameRunning) return;
+        selectedMinesCount = parseInt(val);
+        document.getElementById('minesRangeSlider').value = val;
+        updateMinesSelectorUI();
+    }
+
+    function updateMinesSelectorUI() {
+        document.getElementById('minesCountNumDisplay').innerText = selectedMinesCount;
+        document.getElementById('sliderValPreview').innerText = selectedMinesCount;
+        document.getElementById('hudMinesCount').innerText = selectedMinesCount;
+
+        document.querySelectorAll('.chip-mine-opt').forEach(c => c.classList.remove('active'));
+        if (selectedMinesCount === 3) document.getElementById('chipMines3').classList.add('active');
+
+        updateHudMultipliers();
+    }
+
+    function updateHudMultipliers() {
+        const curMult = calculateMinesMultiplier(selectedMinesCount, currentGemsFound);
+        const nextMult = calculateMinesMultiplier(selectedMinesCount, currentGemsFound + 1);
+
+        document.getElementById('hudCurrentMult').innerText = curMult.toFixed(2) + 'x';
+        document.getElementById('hudNextMult').innerText = nextMult.toFixed(2) + 'x';
+    }
+
+    /* ======================================================== */
+    /* 5. GAME ACTIONS: BET & CASHOUT                           */
+    /* ======================================================== */
+    function adjustBet(delta) {
+        if (isGameRunning) return;
+        const input = document.getElementById('betInputBox');
+        let val = (parseInt(input.value) || 50) + delta;
+        val = Math.max(10, val);
+        input.value = val;
+        document.getElementById('btnActionSubtitle').innerText = `৳${val}`;
+    }
+
+    function setBetValue(val) {
+        if (isGameRunning) return;
+        document.getElementById('betInputBox').value = val;
+        document.getElementById('btnActionSubtitle').innerText = `৳${val}`;
+    }
+
+    function doubleBet() {
+        if (isGameRunning) return;
+        const input = document.getElementById('betInputBox');
+        const val = (parseInt(input.value) || 50) * 2;
+        input.value = val;
+        document.getElementById('btnActionSubtitle').innerText = `৳${val}`;
+    }
+
+    document.getElementById('betInputBox').addEventListener('input', (e) => {
+        const val = Math.max(10, parseInt(e.target.value) || 10);
+        document.getElementById('btnActionSubtitle').innerText = `৳${val}`;
+    });
+
+    function handleMainAction() {
+        if (!isGameRunning) {
+            startNewMinesGame();
+        } else {
+            cashoutMinesGame();
+        }
+    }
+
+    function startNewMinesGame() {
+        activeBetAmount = parseFloat(document.getElementById('betInputBox').value) || 100;
+
+        if (!currentUser || (currentUser.balance || 0) < activeBetAmount) {
+            showToast('আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!', true);
+            return;
+        }
+
+        // 1. Immediately Deduct Balance
+        const newBal = parseFloat((currentUser.balance - activeBetAmount).toFixed(2));
+        const newWager = parseFloat(((currentUser.wagerDone || 0) + activeBetAmount).toFixed(2));
+        const newTotalWager = parseFloat(((currentUser.totalWagered || 0) + activeBetAmount).toFixed(2));
+
+        currentUser.balance = newBal;
+        currentUser.wagerDone = newWager;
+        currentUser.totalWagered = newTotalWager;
+        localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        updateBalanceUI();
+
+        db.ref('users/' + currentUser.uid).update({
+            balance: newBal,
+            wagerDone: newWager,
+            totalWagered: newTotalWager
+        }).catch(() => {});
+
+        // 2. Record Transaction
+        db.ref(`users/${currentUser.uid}/transactions`).push().set({
+            type: 'Mines Master Bet',
+            detail: `Mines: ${selectedMinesCount} - Bet: ৳${activeBetAmount}`,
+            status: 'Deduct',
+            amount: -activeBetAmount,
+            time: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            timestamp: Date.now()
+        }).catch(() => {});
+
+        // 3. Build Board State
+        boardState = new Array(TOTAL_TILES).fill(false);
+        let bombsPlaced = 0;
+        while (bombsPlaced < selectedMinesCount) {
+            const randIdx = Math.floor(Math.random() * TOTAL_TILES);
+            if (!boardState[randIdx]) {
+                boardState[randIdx] = true;
+                bombsPlaced++;
+            }
+        }
+
+        // 4. Activate Grid
+        revealedTiles = [];
+        currentGemsFound = 0;
+        isGameRunning = true;
+
+        for (let i = 0; i < TOTAL_TILES; i++) {
+            const tile = document.getElementById(`tile_${i}`);
+            const flipper = document.getElementById(`flipper_${i}`);
+            const back = document.getElementById(`back_${i}`);
+
+            tile.classList.remove('tile-locked');
+            flipper.classList.remove('flipped');
+            back.className = 'tile-back-face';
+            back.innerHTML = '';
+        }
+
+        // Switch Action Button to CASHOUT
+        const btn = document.getElementById('btnMainAction');
+        btn.className = 'btn-action-trigger btn-mode-cashout';
+        document.getElementById('btnActionTitle').innerText = 'CASHOUT';
+        document.getElementById('btnActionSubtitle').innerText = `৳0.00`;
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+
+        document.getElementById('btnRandomPick').style.display = 'flex';
+        document.getElementById('betInputBox').disabled = true;
+        document.getElementById('minesRangeSlider').disabled = true;
+
+        updateHudMultipliers();
+        showToast('গেম শুরু হয়েছে! টাইল বাছুন।');
+    }
+
+    function onTileClick(index) {
+        if (!isGameRunning || revealedTiles.includes(index)) return;
+
+        audio.playTileClick();
+        revealedTiles.push(index);
+
+        const tile = document.getElementById(`tile_${index}`);
+        const flipper = document.getElementById(`flipper_${index}`);
+        const back = document.getElementById(`back_${index}`);
+
+        tile.classList.add('tile-locked');
+        flipper.classList.add('flipped');
+
+        if (boardState[index] === true) {
+            // Bomb hit
+            audio.playBomb();
+            back.className = 'tile-back-face is-bomb-hit';
+            back.innerHTML = `<i class="fa-solid fa-bomb bomb-3d-symbol"></i>`;
+
+            const wrapper = document.getElementById('minesWrapper');
+            wrapper.classList.add('shake-trigger');
+            setTimeout(() => wrapper.classList.remove('shake-trigger'), 500);
+
+            endGameOnLoss();
+        } else {
+            // Gem hit
+            currentGemsFound++;
+            audio.playGem(currentGemsFound);
+
+            back.className = 'tile-back-face is-gem-win';
+            back.innerHTML = `<i class="fa-solid fa-gem gem-3d-symbol"></i>`;
+
+            const currentMult = calculateMinesMultiplier(selectedMinesCount, currentGemsFound);
+            const liveWin = parseFloat((activeBetAmount * currentMult).toFixed(2));
+
+            // Enable Cashout Button
+            const btn = document.getElementById('btnMainAction');
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+            document.getElementById('btnActionSubtitle').innerText = `৳${liveWin.toFixed(2)} (${currentMult.toFixed(2)}x)`;
+
+            updateHudMultipliers();
+
+            if (currentGemsFound === (TOTAL_TILES - selectedMinesCount)) {
+                cashoutMinesGame();
+            }
+        }
+    }
+
+    function pickRandomTile() {
+        if (!isGameRunning) return;
+        const available = [];
+        for (let i = 0; i < TOTAL_TILES; i++) {
+            if (!revealedTiles.includes(i)) available.push(i);
+        }
+        if (available.length > 0) {
+            const rand = available[Math.floor(Math.random() * available.length)];
+            onTileClick(rand);
+        }
+    }
+
+    function cashoutMinesGame() {
+        if (!isGameRunning || currentGemsFound <= 0) return;
+
+        isGameRunning = false;
+        audio.playCashout();
+
+        const currentMult = calculateMinesMultiplier(selectedMinesCount, currentGemsFound);
+        const winAmount = parseFloat((activeBetAmount * currentMult).toFixed(2));
+
+        // Credit Balance
+        const updatedBal = parseFloat((currentUser.balance + winAmount).toFixed(2));
+        currentUser.balance = updatedBal;
+        localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+        updateBalanceUI();
+
+        db.ref('users/' + currentUser.uid).update({ balance: updatedBal }).catch(() => {});
+
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        db.ref(`users/${currentUser.uid}/transactions`).push().set({
+            type: 'Mines Cashout',
+            detail: `Gems: ${currentGemsFound} (${currentMult}x)`,
+            status: 'Success',
+            amount: winAmount,
+            time: now,
+            timestamp: Date.now()
+        }).catch(() => {});
+
+        saveGameHistoryRecord(true, winAmount, currentMult);
+
+        showToast(`🎉 ক্যাশআউট সফল! ৳${winAmount.toFixed(2)} (${currentMult}x)`);
+        revealRemainingTiles();
+        resetControllerState();
+    }
+
+    function endGameOnLoss() {
+        isGameRunning = false;
+        saveGameHistoryRecord(false, 0, 0);
+        showToast('💥 আপনি বোমায় আঘাত করেছেন! বেট লস।', true);
+        revealRemainingTiles();
+        resetControllerState();
+    }
+
+    function revealRemainingTiles() {
+        for (let i = 0; i < TOTAL_TILES; i++) {
+            const tile = document.getElementById(`tile_${i}`);
+            const flipper = document.getElementById(`flipper_${i}`);
+            const back = document.getElementById(`back_${i}`);
+
+            tile.classList.add('tile-locked');
+
+            if (!revealedTiles.includes(i)) {
+                flipper.classList.add('flipped');
+                back.className = 'tile-back-face is-dimmed-reveal';
+                if (boardState[i] === true) {
+                    back.innerHTML = `<i class="fa-solid fa-bomb" style="color:var(--bomb-red); font-size:22px;"></i>`;
+                } else {
+                    back.innerHTML = `<i class="fa-solid fa-gem" style="color:var(--gem-green); font-size:22px;"></i>`;
+                }
+            }
+        }
+    }
+
+    function resetControllerState() {
+        const btn = document.getElementById('btnMainAction');
+        btn.className = 'btn-action-trigger btn-mode-bet';
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+        document.getElementById('btnActionTitle').innerText = 'BET';
+        document.getElementById('btnActionSubtitle').innerText = `৳${activeBetAmount}`;
+
+        document.getElementById('btnRandomPick').style.display = 'none';
+        document.getElementById('betInputBox').disabled = false;
+        document.getElementById('minesRangeSlider').disabled = false;
+
+        currentGemsFound = 0;
+        updateHudMultipliers();
+    }
+
+    /* ======================================================== */
+    /* 6. MODAL HISTORY SYSTEM                                  */
+    /* ======================================================== */
+    function openHistoryModal() {
+        document.getElementById('historyModal').style.display = 'flex';
+    }
+    function closeHistoryModal() {
+        document.getElementById('historyModal').style.display = 'none';
+    }
+
+    function saveGameHistoryRecord(isWin, winAmount, mult) {
+        if (!currentUser || !currentUser.uid) return;
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const record = {
+            game: 'Mines Master',
+            mines: selectedMinesCount,
+            gemsFound: currentGemsFound,
+            bet: activeBetAmount,
+            payout: winAmount,
+            win: isWin,
+            mult: mult,
+            time: now,
+            timestamp: Date.now()
+        };
+
+        db.ref(`users/${currentUser.uid}/gameHistory`).push().set(record).catch(() => {});
+        prependHistoryRowUI(record);
+    }
+
+    function loadPersistentHistoryFromFirebase() {
+        if (!currentUser || !currentUser.uid) return;
+        db.ref(`users/${currentUser.uid}/gameHistory`).orderByChild('timestamp').limitToLast(15).once('value', snap => {
+            if (!snap.exists()) return;
+            const container = document.getElementById('historyModalList');
+            container.innerHTML = '';
+            const records = [];
+            snap.forEach(c => records.push(c.val()));
+            records.reverse().forEach(r => {
+                if (r.game === 'Mines Master') prependHistoryRowUI(r);
+            });
+        });
+    }
+
+    function prependHistoryRowUI(rec) {
+        const container = document.getElementById('historyModalList');
+        if (!container) return;
+        if (container.querySelector('p')) container.innerHTML = '';
+
+        const row = document.createElement('div');
+        row.className = 'history-log-row';
+        row.innerHTML = `
+            <div>
+                <strong>${rec.gemsFound} 💎 (${rec.mines} 💣)</strong>
+                <div style="font-size:10px; color:#94a3b8;">${rec.time.slice(11)}</div>
+            </div>
+            <div style="text-align:right;">
+                <strong style="color:${rec.win ? 'var(--gem-green)' : 'var(--bomb-red)'}; font-size:13px;">${rec.win ? '+৳' + rec.payout.toFixed(2) : '-৳' + rec.bet}</strong>
+                <div style="font-size:10px; color:#94a3b8;">${rec.win ? rec.mult + 'x' : 'Busted'}</div>
+            </div>
+        `;
+        container.prepend(row);
+    }
+
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('minesToast');
+        const text = document.getElementById('toastMsg');
+        const icon = document.getElementById('toastIcon');
+
+        text.innerText = msg;
+        icon.className = isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
+        icon.style.color = isError ? 'var(--bomb-red)' : 'var(--gold-primary)';
+
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    /* Start Game Engine */
+    window.addEventListener('DOMContentLoaded', () => {
+        generateBoardTiles();
+        updateMinesSelectorUI();
+    });
+</script>
+
+</body>
+</html>

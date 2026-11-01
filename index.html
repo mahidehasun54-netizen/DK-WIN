@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DKWIN - Premier Casino & Gaming Platform</title>
+
+    <!-- App Icon / Favicon -->
+    <link rel="icon" type="image/webp" href="dk-win-games-icon.webp">
+    <link rel="apple-touch-icon" href="dk-win-games-icon.webp">
+
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- OneSignal Push Notification SDK -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e569c255-a080-4f19-94f7-75341390fcbe",
+        });
+      });
+    </script>
+
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --primary-yellow: #f5b700;
+            --primary-dark-yellow: #e69500;
+            --primary-gradient: linear-gradient(135deg, #fbc02d, #f39c12);
+            --bg-gray: #0b0f19;
+            --surface-dark: #121826;
+            --surface-card: #182234;
+            --border-dark: #223048;
+            --white: #ffffff;
+            --text-dark: #1b1e28;
+            --text-muted: #8c9099;
+            --border-color: #e5e7eb;
+            --gold-glow: 0 0 15px rgba(245, 183, 0, 0.35);
+            --green: #2ecc71;
+            --green-dark: #27ae60;
+            --red: #e74c3c;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background-color: #05070a; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+
+        .app-wrapper { width: 100%; max-width: 480px; min-height: 100vh; background-color: #f4f5f8; position: relative; box-shadow: 0 0 45px rgba(0,0,0,0.9); overflow-x: hidden; display: flex; flex-direction: column; }
+
+        /* Web-Only Top Download APK Banner */
+        #topAppDownloadBanner {
+            background: linear-gradient(90deg, #111726 0%, #182234 100%);
+            border-bottom: 2px solid var(--primary-yellow);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10001;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            font-family: 'Poppins', 'Hind Siliguri', sans-serif;
+        }
+        .banner-app-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .banner-app-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            border: 1.5px solid var(--primary-yellow);
+            object-fit: cover;
+        }
+        .banner-app-details h4 {
+            margin: 0;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+        .banner-app-details p {
+            margin: 2px 0 0;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        .banner-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .banner-download-btn {
+            background: var(--primary-gradient);
+            color: #111;
+            font-weight: 800;
+            font-size: 11.5px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 3px 10px rgba(245, 183, 0, 0.35);
+            transition: transform 0.15s;
+        }
+        .banner-download-btn:active {
+            transform: scale(0.95);
+        }
+        .banner-close-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Top Ribbon */
+        .system-status-ribbon { background: #090d14; padding: 4px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 700; color: #8c99ab; border-bottom: 1px solid #1a2230; z-index: 1000; }
+        .status-dot-pill { display: inline-flex; align-items: center; gap: 5px; color: #2ed573; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #2ed573; box-shadow: 0 0 8px #2ed573; }
+        .status-dot.offline { background: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+
+        /* Marquee */
+        .live-marquee-box { background: #fff4d9; color: #b7791f; padding: 6px 10px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #fde68a; }
+        .marquee-content { white-space: nowrap; overflow: hidden; flex: 1; }
+        .marquee-text { display: inline-block; padding-left: 100%; animation: marqueeScroll 22s linear infinite; }
+        @keyframes marqueeScroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+        /* Global Spinner & Toast */
+        #globalSpinner { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 12, 16, 0.88); backdrop-filter: blur(4px); z-index: 99999; display: none; justify-content: center; align-items: center; flex-direction: column; color: #fff; gap: 12px; }
+        .spinner-ring { width: 45px; height: 45px; border: 4px solid #242f40; border-top: 4px solid var(--primary-yellow); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #appToast { position: fixed; top: -90px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 420px; background: #18202c; color: #ffffff; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; z-index: 100000; box-shadow: 0 10px 30px rgba(0,0,0,0.65); border-left: 5px solid var(--primary-yellow); transition: all 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55); font-size: 13.5px; }
+        #appToast.show { top: 15px; }
+
+        /* App Views */
+        .app-view { display: none; width: 100%; min-height: 100vh; padding-bottom: 75px; }
+        .app-view.active { display: block; }
+
+        .subpage-nav { background: #ffffff; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .subpage-nav h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+        .nav-back-btn { font-size: 18px; color: #333; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f1f2f6; }
+
+        /* Auth */
+        #view-auth { background: #ffffff; padding: 35px 24px; min-height: 100vh; display: none; flex-direction: column; justify-content: center; }
+        #view-auth.active { display: flex; }
+        .auth-brand { text-align: center; margin-bottom: 25px; }
+        .auth-brand h1 { font-size: 34px; font-weight: 900; color: #111; letter-spacing: 1.5px; }
+        .auth-brand h1 span { color: var(--primary-dark-yellow); }
+        .auth-brand p { font-size: 12px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .auth-nav-pill { display: flex; background: #f1f3f7; border-radius: 30px; padding: 4px; margin-bottom: 24px; }
+        .auth-pill-btn { flex: 1; padding: 11px; border: none; background: transparent; font-weight: 700; color: #666; cursor: pointer; border-radius: 25px; transition: all 0.3s; font-size: 14px; }
+        .auth-pill-btn.active { background: #ffffff; color: #111; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .auth-box-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+        .auth-field { margin-bottom: 16px; }
+        .auth-field label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px; }
+        .auth-input-rel { position: relative; display: flex; align-items: center; }
+        .auth-input-rel i { position: absolute; left: 14px; color: #aaa; font-size: 14px; }
+        .auth-input { width: 100%; padding: 12px 14px 12px 40px; background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: var(--radius-sm); font-size: 14px; color: #222; outline: none; transition: all 0.3s; }
+        .auth-input:focus { background: #fff; border-color: var(--primary-yellow); box-shadow: var(--gold-glow); }
+        .auth-action-btn { width: 100%; padding: 13px; background: var(--primary-gradient); border: none; border-radius: 30px; color: #111; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3); margin-top: 10px; transition: transform 0.1s; }
+        .auth-action-btn:active { transform: scale(0.98); }
+        .auth-forgot-link { display: block; text-align: center; font-size: 12px; color: var(--primary-dark-yellow); margin-top: 15px; font-weight: 600; cursor: pointer; }
+
+        /* CASINO HOME LOBBY */
+        #view-home { background: #0c101a; color: #fff; min-height: 100vh; padding-bottom: 80px; }
+        .home-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #111726; border-bottom: 1px solid #1f2b40; position: sticky; top: 0; z-index: 100; }
+        .home-brand-logo { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .home-brand-logo span { color: var(--primary-yellow); }
+        .home-header-right { display: flex; align-items: center; gap: 8px; }
+        .home-user-avatar-tiny { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--primary-yellow); object-fit: cover; cursor: pointer; }
+        .home-balance-chip { background: #192336; border: 1px solid #273650; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; color: #2ed573; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .home-dep-btn { background: var(--primary-gradient); color: #111; border: none; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 10px rgba(245, 183, 0, 0.3); }
+
+        /* Ad Banner Carousel */
+        .banner-carousel-container { position: relative; width: calc(100% - 24px); margin: 12px 12px 8px 12px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); aspect-ratio: 16 / 7.5; background: #182234; }
+        .banner-track { display: flex; width: 100%; height: 100%; transition: transform 0.5s ease-in-out; }
+        .banner-slide { min-width: 100%; height: 100%; position: relative; }
+        .banner-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .banner-dots-box { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; }
+        .banner-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.2s; }
+        .banner-dot.active { width: 18px; border-radius: 6px; background: var(--primary-yellow); }
+
+        /* Quick Action Bar */
+        .home-quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px 14px; margin-bottom: 6px; }
+        .home-action-btn { background: #141c2c; border: 1px solid #202d44; border-radius: 12px; padding: 10px 4px; text-align: center; cursor: pointer; transition: transform 0.15s; }
+        .home-action-btn:active { transform: scale(0.96); }
+        .home-action-btn i { font-size: 20px; margin-bottom: 5px; display: block; }
+        .home-action-btn span { font-size: 11px; font-weight: 700; color: #cfd9e8; display: block; }
+
+        /* Real-time Winning Ticker */
+        .home-winners-strip { margin: 4px 14px 14px 14px; background: linear-gradient(90deg, #182438 0%, #111a29 100%); border: 1px solid #23344e; border-radius: 10px; padding: 6px 10px; display: flex; align-items: center; gap: 8px; font-size: 11px; overflow: hidden; }
+        .home-winners-strip i { color: #f5b700; }
+        .winners-feed-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #9ab0cb; }
+        .winners-feed-text strong { color: #2ed573; }
+
+        /* Category Tabs */
+        .casino-category-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 0 14px 10px 14px; scrollbar-width: none; }
+        .casino-category-tabs::-webkit-scrollbar { display: none; }
+        .cat-tab-btn { background: #162030; color: #8fa1b8; border: 1px solid #23324a; padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .cat-tab-btn.active { background: var(--primary-gradient); color: #111; border-color: var(--primary-yellow); font-weight: 800; box-shadow: 0 3px 10px rgba(245, 183, 0, 0.3); }
+
+        /* Games Grid */
+        .games-section-header { padding: 4px 16px 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+        .games-section-title { font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .games-section-title span { color: var(--primary-yellow); }
+        .casino-games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 14px; margin-bottom: 20px; }
+
+        .casino-game-card { background: #151d2a; border-radius: 14px; overflow: hidden; border: 1.5px solid #223048; position: relative; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        .casino-game-card:active { transform: scale(0.97); }
+        .game-thumb-wrapper { width: 100%; aspect-ratio: 16 / 10.5; position: relative; overflow: hidden; background: #0b0f16; }
+        .game-thumb-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: block; }
+        .casino-game-card:hover .game-thumb-img { transform: scale(1.05); }
+        .game-badge-hot { position: absolute; top: 6px; left: 6px; background: linear-gradient(135deg, #e51b24, #ff4757); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 8px; text-transform: uppercase; box-shadow: 0 2px 6px rgba(0,0,0,0.4); z-index: 2; }
+        .game-badge-live { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); color: #2ed573; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 8px; display: flex; align-items: center; gap: 4px; z-index: 2; }
+        .game-info-dock { padding: 9px 10px; display: flex; justify-content: space-between; align-items: center; background: #131b28; }
+        .game-title-text { font-size: 13px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .game-sub-text { font-size: 10px; color: #7f93aa; }
+        .game-play-btn-circle { width: 28px; height: 28px; border-radius: 50%; background: var(--primary-gradient); color: #111; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(245, 183, 0, 0.4); }
+
+        /* TOP 10 LEADERBOARD */
+        .home-leaderboard-section { margin: 10px 14px 25px 14px; background: #121824; border: 1.5px solid #1f2b40; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+        .leaderboard-header { padding: 12px 14px; background: linear-gradient(90deg, #182338 0%, #111827 100%); border-bottom: 1px solid #23344e; display: flex; justify-content: space-between; align-items: center; }
+        .leaderboard-header-title { font-size: 14px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .leaderboard-header-title i { color: #f5b700; font-size: 16px; }
+        .leaderboard-live-pill { background: rgba(46, 213, 115, 0.15); border: 1px solid rgba(46, 213, 115, 0.3); color: #2ed573; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px; display: flex; align-items: center; gap: 4px; }
+        .leaderboard-list { display: flex; flex-direction: column; }
+        .leader-item-row { display: grid; grid-template-columns: 36px 40px 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #182030; transition: background 0.2s; }
+        .leader-item-row:last-child { border-bottom: none; }
+        .leader-rank-badge { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; }
+        .rank-gold { background: linear-gradient(135deg, #ffd700, #ff9800); color: #111; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4); }
+        .rank-silver { background: linear-gradient(135deg, #e0e0e0, #9e9e9e); color: #111; box-shadow: 0 2px 8px rgba(158, 158, 158, 0.3); }
+        .rank-bronze { background: linear-gradient(135deg, #d78b54, #8d4f2b); color: #fff; box-shadow: 0 2px 8px rgba(215, 139, 84, 0.3); }
+        .rank-normal { background: #1a2334; color: #8fa0b5; font-size: 11px; }
+        .leader-avatar-wrap { width: 38px; height: 38px; position: relative; }
+        .leader-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 1.5px solid #2d3e56; }
+        .leader-meta { overflow: hidden; }
+        .leader-uid-line { font-size: 12.5px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .leader-vip-badge { font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 6px; background: rgba(245, 183, 0, 0.2); color: #f5b700; border: 1px solid rgba(245, 183, 0, 0.3); }
+        .leader-sub-text { font-size: 10px; color: #7f93aa; margin-top: 1px; }
+        .leader-stats-right { text-align: right; }
+        .leader-bet-amount { font-size: 13px; font-weight: 900; color: #2ed573; letter-spacing: 0.2px; }
+        .leader-bet-label { font-size: 9.5px; color: #8fa0b5; font-weight: 600; }
+
+        /* External Game Container (For Aviator, Win Go, Mines etc.) */
+        #view-external-game { background: #000; width: 100%; height: 100vh; padding-bottom: 0; position: relative; }
+        .external-game-nav { background: #111726; color: #fff; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2b40; }
+        .external-game-iframe { width: 100%; height: calc(100vh - 52px); border: none; display: block; }
+
+        /* Profile & Subpages */
+        .profile-top-banner { background: linear-gradient(180deg, #f7c325 0%, #f4b41a 100%); padding: 24px 18px 65px 18px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; position: relative; }
+        .profile-user-card { display: flex; align-items: center; gap: 14px; }
+        .avatar-wrap-rel { position: relative; cursor: pointer; }
+        .profile-avatar { width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid #ffffff; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.15); background: #fff; display: block; }
+        .avatar-edit-icon { position: absolute; bottom: 0; right: 0; background: #111; color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #fff; }
+        .user-text-meta h2 { font-size: 16px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px; }
+        .badge-vip { background: rgba(255, 255, 255, 0.9); color: #333; font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px; display: inline-flex; align-items: center; gap: 3px; }
+        .uid-string { font-size: 12px; color: rgba(255, 255, 255, 0.95); margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+        .time-string { font-size: 11px; color: rgba(255, 255, 255, 0.85); margin-top: 3px; }
+
+        .balance-card-elevated { background: #ffffff; margin: -45px 16px 14px 16px; border-radius: var(--radius-lg); padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); position: relative; z-index: 5; }
+        .balance-head-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .balance-amount-row { display: flex; align-items: center; gap: 8px; margin: 4px 0 16px 0; }
+        .balance-amount-val { font-size: 26px; font-weight: 800; color: #111; }
+        .btn-balance-refresh { font-size: 16px; color: #888; cursor: pointer; transition: transform 0.3s; }
+        .btn-balance-refresh:active { transform: rotate(180deg); }
+
+        .icon-actions-bar { display: flex; justify-content: space-between; border-top: 1px solid #f1f2f6; padding-top: 14px; }
+        .icon-action-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex: 1; }
+        .action-bubble { width: 46px; height: 46px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 19px; }
+        .icon-action-item span { font-size: 12px; font-weight: 600; color: var(--text-dark); }
+        .bg-bonus { background: #ffeded; color: #e74c3c; }
+        .bg-deposit { background: #ffe8d6; color: #e67e22; }
+        .bg-withdraw { background: #dff9fb; color: #0984e3; }
+        .bg-vip { background: #e8f8f5; color: #1abc9c; }
+
+        /* Safe Balance Box Tile */
+        .safe-banner-tile { background: #ffffff; margin: 0 16px 14px 16px; border-radius: var(--radius-md); padding: 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid #fed330; }
+        .safe-tile-left { display: flex; align-items: center; gap: 12px; }
+        .safe-sun-icon { width: 44px; height: 44px; border-radius: 12px; background: #fff9e6; color: #f1c40f; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .safe-headline { font-size: 15px; font-weight: 700; color: #222; }
+        .safe-subtitle { font-size: 10px; color: var(--text-muted); max-width: 220px; line-height: 1.35; margin-top: 2px; }
+        .safe-tile-right { color: #f39c12; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+
+        .profile-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 16px 14px 16px; }
+        .grid-card-node { background: #ffffff; padding: 14px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); cursor: pointer; }
+        .grid-node-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .grid-node-text h4 { font-size: 13px; color: #222; font-weight: 700; }
+        .grid-node-text p { font-size: 10px; color: var(--text-muted); }
+
+        .profile-list-block { background: #ffffff; margin: 0 16px 20px 16px; border-radius: var(--radius-md); box-shadow: 0 2px 8px rgba(0,0,0,0.03); overflow: hidden; }
+        .list-row-cell { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f6f6f6; cursor: pointer; }
+        .list-row-cell:last-child { border-bottom: none; }
+        .list-left-content { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: var(--text-dark); }
+        .bubble-badge { background: var(--red); color: #fff; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+
+        .page-content-wrapper { padding: 16px; }
+        .page-block-label { font-size: 13px; font-weight: 700; color: #333; margin: 12px 0 8px 0; }
+        .grid-method-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+        .method-choice-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: var(--radius-md); padding: 12px 4px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .method-choice-card.active { border-color: var(--primary-dark-yellow); background: #fffdf5; box-shadow: 0 4px 12px rgba(243, 156, 18, 0.15); }
+        .method-choice-card i { font-size: 22px; margin-bottom: 4px; display: block; }
+        .method-choice-card span { font-size: 12px; font-weight: 700; display: block; }
+
+        .wallet-copy-strip { background: #ffffff; border-radius: var(--radius-md); padding: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; margin-bottom: 14px; }
+        .wallet-copy-strip strong { font-size: 16px; letter-spacing: 1px; color: #111; }
+        .btn-copy-bubble { background: var(--primary-gradient); border: none; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px; cursor: pointer; }
+        .instructions-box-styled { background: #fff9e6; border-left: 4px solid var(--primary-yellow); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; font-size: 12px; line-height: 1.6; color: #555; }
+        .instructions-box-styled h5 { color: #d35400; font-size: 13px; margin-bottom: 6px; }
+        .warning-box-styled { background: #fdf0f0; border-left: 4px solid var(--red); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; font-size: 12px; line-height: 1.6; color: #666; }
+        .warning-box-styled h5 { color: var(--red); font-size: 13px; margin-bottom: 6px; }
+
+        /* Turnover Progress Card for Withdraw */
+        .turnover-status-card { background: #ffffff; border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px; border: 1.5px solid #fed330; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+        .turnover-progress-bar-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 8px 0; }
+        .turnover-progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f5b700, #2ecc71); width: 0%; transition: width 0.3s; }
+
+        /* History Card Box */
+        .history-card-box { background: #ffffff; border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px; border: 1px solid #eef0f4; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .history-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; margin-bottom: 10px; }
+        .status-pill { font-size: 10.5px; font-weight: 800; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; }
+        .status-pending { background: #ffeaa7; color: #d35400; border: 1px solid #fed330; }
+        .status-approved, .status-success { background: #dff9fb; color: #00b894; border: 1px solid #55efc4; }
+        .status-rejected, .status-failed { background: #ff7675; color: #ffffff; border: 1px solid #d63031; }
+
+        .history-card-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; color: #555; }
+        .history-card-row strong { color: #111; }
+
+        /* Safe Balance Box Detailed Page Style */
+        .safebox-balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: var(--radius-lg); padding: 20px; color: #fff; margin-bottom: 18px; border: 1px solid #334155; box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .safebox-daily-badge { background: rgba(245, 183, 0, 0.15); color: #f5b700; border: 1px solid rgba(245, 183, 0, 0.3); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
+        .safebox-card-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; padding-top: 14px; margin-top: 14px; }
+
+        /* Bonus Hub Style */
+        .bonus-section-title { font-size: 14px; font-weight: 800; color: #222; margin: 16px 0 10px 0; display: flex; align-items: center; gap: 6px; }
+        .bonus-grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+        .bonus-card-box { background: #fff; border-radius: var(--radius-md); padding: 14px; border: 1.5px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .bonus-card-box h5 { font-size: 13px; color: #333; margin-bottom: 4px; }
+        .bonus-card-box .bonus-reward { font-size: 18px; font-weight: 900; color: #e67e22; margin: 6px 0; }
+        .bonus-btn { background: var(--primary-gradient); border: none; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; color: #111; width: 100%; }
+        .bonus-btn.claimed { background: #e2e8f0; color: #888; cursor: default; }
+
+        .vip-reward-card { background: #fff; border-radius: var(--radius-md); padding: 14px; border: 1.5px solid #e2e8f0; margin-bottom: 10px; }
+        .vip-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+
+        /* Modals */
+        .modal-support-sheet { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 16px; }
+        .support-modal-box { background: #fff; width: 100%; max-width: 380px; border-radius: var(--radius-lg); padding: 24px; text-align: center; }
+
+        /* Entry Notice Modal */
+        .entry-notice-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
+        .entry-notice-card { background: #121824; border: 1.5px solid #2a374a; width: 100%; max-width: 390px; border-radius: 18px; overflow: hidden; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.85); color: #fff; display: flex; flex-direction: column; }
+        .entry-notice-close-btn { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.6); color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; border: 1px solid rgba(255,255,255,0.3); z-index: 10; }
+        .entry-notice-image { width: 100%; max-height: 180px; object-fit: cover; display: block; border-bottom: 1px solid #1f2c3d; }
+        .entry-notice-body { padding: 18px 20px; text-align: center; }
+        .entry-notice-body h3 { font-size: 17px; font-weight: 800; color: var(--primary-yellow); margin-bottom: 8px; }
+        .entry-notice-body p { font-size: 12.5px; color: #cbd5e1; line-height: 1.55; white-space: pre-line; margin-bottom: 16px; }
+
+        /* 4-TAB BOTTOM NAVIGATION BAR */
+        #bottomNavBar { display: none; position: fixed; bottom: 0; width: 100%; max-width: 480px; height: 65px; background: #111726; border-top: 1px solid #1f2b40; justify-content: space-around; align-items: center; z-index: 999; }
+        .nav-quad-item { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #7f93aa; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .nav-quad-item i { font-size: 19px; }
+        .nav-quad-item.active { color: var(--primary-yellow); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <!-- [NEW] WEB-ONLY TOP APP DOWNLOAD BANNER (HIDES INSIDE APK) -->
+    <div id="topAppDownloadBanner">
+        <div class="banner-app-info">
+            <img src="dk-win-games-icon.webp" alt="App Icon" class="banner-app-icon" onerror="this.src='favicon.png'">
+            <div class="banner-app-details">
+                <h4>DKWIN Official App</h4>
+                <p>সেরা ও দ্রুত অভিজ্ঞতার জন্য অ্যাপটি নামিয়ে নিন</p>
+            </div>
+        </div>
+        <div class="banner-btn-group">
+            <a href="dkwin.apk" id="topApkDownloadLink" class="banner-download-btn" download>
+                <i class="fa-solid fa-download"></i> ডাউনলোড
+            </a>
+            <button class="banner-close-btn" onclick="closeTopDownloadBanner()" title="বন্ধ করুন">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 0. TOP STATUS & MARQUEE ANNOUNCEMENT BAR -->
+    <div class="system-status-ribbon">
+        <div class="status-dot-pill">
+            <div class="status-dot" id="liveConnDot"></div>
+            <span id="liveConnText">সার্ভার: অনলাইন (লাইভ সিঙ্ক)</span>
+        </div>
+        <div style="cursor:pointer;" onclick="openSupportModal()">
+            <i class="fa-solid fa-headset" style="color:var(--primary-yellow);"></i> লাইভ সাপোর্ট
+        </div>
+    </div>
+
+    <div class="live-marquee-box">
+        <i class="fa-solid fa-bullhorn"></i>
+        <div class="marquee-content">
+            <span class="marquee-text" id="liveMarqueeNotice">স্বাগতম DKWIN প্ল্যাটফর্মে! ১০০% বিশ্বস্ত ও লাইভ এভিয়েটর, উইঙ্গো ও ক্যাসিনো গেম খেলুন এবং তাত্ক্ষণিক ডিপোজিট ও উইথড্র সুবিধা উপভোগ করুন।</span>
+        </div>
+    </div>
+
+    <!-- GLOBAL SPINNER -->
+    <div id="globalSpinner">
+        <div class="spinner-ring"></div>
+        <span id="spinnerText">লোড হচ্ছে...</span>
+    </div>
+
+    <!-- TOAST -->
+    <div id="appToast">
+        <i class="fa-solid fa-circle-info" id="toastIcon" style="color:var(--primary-yellow); font-size:18px;"></i>
+        <span id="toastMsg">বিজ্ঞপ্তি বার্তা</span>
+    </div>
+
+    <!-- FILE INPUT FOR AVATAR -->
+    <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+
+    <!-- ENTRY POPUP NOTICE -->
+    <div class="entry-notice-overlay" id="entryNoticeModal">
+        <div class="entry-notice-card">
+            <div class="entry-notice-close-btn" onclick="closeEntryNoticeModal()" title="বন্ধ করুন">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+            <img id="entryNoticeImage" class="entry-notice-image" src="" alt="Notice Banner" style="display:none;" onerror="this.style.display='none'">
+            <div class="entry-notice-body">
+                <h3 id="entryNoticeTitle">জরুরি নোটিশ</h3>
+                <p id="entryNoticeDesc">স্বাগতম DKWIN অফিশিয়াল গেমিং প্ল্যাটফর্মে!</p>
+                <button class="auth-action-btn" style="margin-top:4px; padding:10px;" onclick="closeEntryNoticeModal()">ঠিক আছে (বন্ধ করুন)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 1. AUTHENTICATION                                        -->
+    <!-- ======================================================== -->
+    <div id="view-auth" class="app-view active">
+        <div class="auth-brand">
+            <h1>DK<span>WIN</span></h1>
+            <p>Official Licensed Gaming Platform</p>
+        </div>
+
+        <div class="auth-nav-pill">
+            <button class="auth-pill-btn active" onclick="switchAuthMode('login')">লগইন</button>
+            <button class="auth-pill-btn" onclick="switchAuthMode('register')">রেজিস্ট্রেশন</button>
+        </div>
+
+        <div class="auth-box-card">
+            <!-- Login Form -->
+            <form id="authLoginForm" onsubmit="handleUserLogin(event)">
+                <div class="auth-field">
+                    <label>ইমেইল অথবা মোবাইল নাম্বার</label>
+                    <div class="auth-input-rel">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="loginUserField" class="auth-input" required placeholder="01XXXXXXXXX বা ইমেইল" autocomplete="username">
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label>পাসওয়ার্ড</label>
+                    <div class="auth-input-rel">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="loginPassField" class="auth-input" required placeholder="পাসওয়ার্ড দিন" autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="auth-action-btn">প্রবেশ করুন (Login)</button>
+                <span class="auth-forgot-link" onclick="openForgotSequence()">পাসওয়ার্ড ভুলে গেছেন?</span>
+            </form>
+
+            <!-- Registration Form -->
+            <form id="authRegisterForm" style="display:none;" onsubmit="handleUserRegister(event)">
+                <div class="auth-field">
+                    <label>ইমেইল অ্যাড্রেস</label>
+                    <div class="auth-input-rel">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="regEmailField" class="auth-input" required placeholder="name@mail.com" autocomplete="email">
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label>মোবাইল নাম্বার</label>
+                    <div class="auth-input-rel">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="regPhoneField" class="auth-input" required placeholder="01XXXXXXXXX" autocomplete="tel">
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label>পাসওয়ার্ড</label>
+                    <div class="auth-input-rel">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="regPassField" class="auth-input" required placeholder="কমপক্ষে ৬ সংখ্যার পাসওয়ার্ড" autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label>কনফার্ম পাসওয়ার্ড</label>
+                    <div class="auth-input-rel">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <input type="password" id="regConfirmPassField" class="auth-input" required placeholder="পাসওয়ার্ড নিশ্চিত করুন" autocomplete="new-password">
+                    </div>
+                </div>
+                <button type="submit" class="auth-action-btn">রেজিস্ট্রেশন সম্পন্ন করুন</button>
+            </form>
+
+            <!-- Forgot Password Sequence -->
+            <div id="forgotStepBox" style="display:none;">
+                <div id="forgotStep1">
+                    <div class="auth-field">
+                        <label>আপনার অ্যাকাউন্টের ইমেইল দিন (ধাপ ১)</label>
+                        <div class="auth-input-rel">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="forgotMailInput" class="auth-input" placeholder="ইমেইল দিন">
+                        </div>
+                    </div>
+                    <button type="button" class="auth-action-btn" onclick="submitForgotStep1()">পরবর্তী ধাপ</button>
+                </div>
+                <div id="forgotStep2" style="display:none;">
+                    <div class="auth-field">
+                        <label>রেজিস্টার্ড মোবাইল নাম্বার (ধাপ ২)</label>
+                        <div class="auth-input-rel">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="forgotPhoneInput" class="auth-input" placeholder="01XXXXXXXXX">
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label>নতুন পাসওয়ার্ড দিন</label>
+                        <div class="auth-input-rel">
+                            <i class="fa-solid fa-key"></i>
+                            <input type="password" id="forgotNewPassInput" class="auth-input" placeholder="নতুন পাসওয়ার্ড">
+                        </div>
+                    </div>
+                    <button type="button" class="auth-action-btn" onclick="submitForgotStep2()">পাসওয়ার্ড পরিবর্তন করুন</button>
+                </div>
+                <span class="auth-forgot-link" onclick="switchAuthMode('login')">লগইনে ফিরে যান</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 2. CASINO HOME LOBBY                                     -->
+    <!-- ======================================================== -->
+    <div id="view-home" class="app-view">
+        <!-- Lobby Top Bar -->
+        <div class="home-top-bar">
+            <div class="home-brand-logo">
+                <i class="fa-solid fa-dice" style="color:var(--primary-yellow);"></i> DK<span>WIN</span>
+            </div>
+            <div class="home-header-right">
+                <img id="homeUserAvatarTiny" class="home-user-avatar-tiny" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Avatar" onclick="switchToView('view-profile')">
+                <div class="home-balance-chip" onclick="switchToView('view-profile')">
+                    ৳<span id="homeBalanceVal">0.00</span>
+                </div>
+                <button class="home-dep-btn" onclick="switchToView('view-deposit')">
+                    <i class="fa-solid fa-plus"></i> ডিপোজিট
+                </button>
+            </div>
+        </div>
+
+        <!-- Ad Banner Carousel -->
+        <div class="banner-carousel-container" id="bannerCarouselContainer">
+            <div class="banner-track" id="bannerTrack">
+                <div class="banner-slide">
+                    <img src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80" alt="Casino Banner 1">
+                </div>
+                <div class="banner-slide">
+                    <img src="https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80" alt="Casino Banner 2">
+                </div>
+                <div class="banner-slide">
+                    <img src="https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=800&q=80" alt="Casino Banner 3">
+                </div>
+            </div>
+            <div class="banner-dots-box" id="bannerDotsBox"></div>
+        </div>
+
+        <!-- Quick Action Bar -->
+        <div class="home-quick-actions">
+            <div class="home-action-btn" onclick="switchToView('view-deposit')">
+                <i class="fa-solid fa-wallet" style="color:#2ecc71;"></i>
+                <span>ডিপোজিট</span>
+            </div>
+            <div class="home-action-btn" onclick="switchToView('view-withdraw')">
+                <i class="fa-solid fa-money-bill-transfer" style="color:#00a3e0;"></i>
+                <span>উইথড্র</span>
+            </div>
+            <div class="home-action-btn" onclick="switchToView('view-bonus')">
+                <i class="fa-solid fa-gift" style="color:#f39c12;"></i>
+                <span>বোনাস</span>
+            </div>
+            <div class="home-action-btn" onclick="openSupportModal()">
+                <i class="fa-solid fa-headset" style="color:#e74c3c;"></i>
+                <span>সাপোর্ট</span>
+            </div>
+        </div>
+
+        <!-- Real-time Live Winners Ticker -->
+        <div class="home-winners-strip">
+            <i class="fa-solid fa-trophy"></i>
+            <div class="winners-feed-text" id="homeLiveWinnerTicker">
+                Member <strong>017***45</strong> won <strong>৳4,250.00</strong> in Aviator
+            </div>
+        </div>
+
+        <!-- Category Selector Tabs -->
+        <div class="casino-category-tabs">
+            <div class="cat-tab-btn active" onclick="filterHomeGames('all', this)"><i class="fa-solid fa-border-all"></i> All Games</div>
+            <div class="cat-tab-btn" onclick="filterHomeGames('crash', this)"><i class="fa-solid fa-plane-departure"></i> Crash Games</div>
+            <div class="cat-tab-btn" onclick="filterHomeGames('lottery', this)"><i class="fa-solid fa-dice-six"></i> Lottery / Wingo</div>
+            <div class="cat-tab-btn" onclick="filterHomeGames('slots', this)"><i class="fa-solid fa-coins"></i> Slots</div>
+            <div class="cat-tab-btn" onclick="filterHomeGames('live', this)"><i class="fa-solid fa-crown"></i> Live Casino</div>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="games-section-header">
+            <div class="games-section-title">
+                <i class="fa-solid fa-fire" style="color:#ff4757;"></i> Popular <span>Games</span>
+            </div>
+            <span style="font-size:11px; color:#7f93aa;">লাইভ প্লেয়ার: ৪,৮৫০+</span>
+        </div>
+
+        <div class="casino-games-grid" id="casinoGamesGrid">
+            <!-- 1. AVIATOR PRO (OPENS aviator.html) -->
+            <div class="casino-game-card" data-cat="crash" onclick="launchCustomGame('aviator', 'Aviator Pro', 'aviator.html')">
+                <div class="game-thumb-wrapper">
+                    <img id="gameThumb_aviator" class="game-thumb-img" src="https://kappa.lol/XoPCf4" referrerpolicy="no-referrer" alt="Aviator">
+                    <div class="game-badge-hot">HOT 🔥</div>
+                    <div class="game-badge-live"><i class="fa-solid fa-circle" style="font-size:6px;"></i> LIVE</div>
+                </div>
+                <div class="game-info-dock">
+                    <div>
+                        <div class="game-title-text">Aviator Pro</div>
+                        <div class="game-sub-text">Crash • 99% RTP</div>
+                    </div>
+                    <div class="game-play-btn-circle"><i class="fa-solid fa-play"></i></div>
+                </div>
+            </div>
+
+            <!-- 2. WIN GO LOTTERY (OPENS go.html) -->
+            <div class="casino-game-card" data-cat="lottery" onclick="launchCustomGame('wingo', 'Win Go Lottery', 'go.html')">
+                <div class="game-thumb-wrapper">
+                    <img id="gameThumb_wingo" class="game-thumb-img" src="https://kappa.lol/MNMm8I" alt="Win Go" onerror="this.src='https://kappa.lol/MNMm8I'">
+                    <div class="game-badge-hot" style="background:#27ae60;">NEW</div>
+                    <div class="game-badge-live"><i class="fa-solid fa-circle" style="font-size:6px;"></i> 1M LIVE</div>
+                </div>
+                <div class="game-info-dock">
+                    <div>
+                        <div class="game-title-text">Win Go Lottery</div>
+                        <div class="game-sub-text">Color & Number • 1Min</div>
+                    </div>
+                    <div class="game-play-btn-circle"><i class="fa-solid fa-play"></i></div>
+                </div>
+            </div>
+
+            <!-- 3. MINES MASTER (OPENS mines.html) -->
+            <div class="casino-game-card" data-cat="crash" onclick="launchCustomGame('mines', 'Mines Master', 'mines.html')">
+                <div class="game-thumb-wrapper">
+                    <img id="gameThumb_mines" class="game-thumb-img" src="https://kappa.lol/BAVzPX" alt="Mines" onerror="this.src='https://kappa.lol/BAVzPX'">
+                    <div class="game-badge-live"><i class="fa-solid fa-circle" style="font-size:6px;"></i> MULTI</div>
+                </div>
+                <div class="game-info-dock">
+                    <div>
+                        <div class="game-title-text">Mines Master</div>
+                        <div class="game-sub-text">Instant Cashout</div>
+                    </div>
+                    <div class="game-play-btn-circle"><i class="fa-solid fa-play"></i></div>
+                </div>
+            </div>
+
+            <!-- 4. DRAGON TIGER (OPENS dragontiger.html) -->
+            <div class="casino-game-card" data-cat="live" onclick="launchCustomGame('dragontiger', 'Dragon Tiger', 'dragontiger.html')">
+                <div class="game-thumb-wrapper">
+                    <img id="gameThumb_dragontiger" class="game-thumb-img" src="https://kappa.lol/rlmh4C" alt="Dragon Tiger" onerror="this.src='https://kappa.lol/rlmh4C'">
+                    <div class="game-badge-live"><i class="fa-solid fa-circle" style="font-size:6px;"></i> REAL-TIME</div>
+                </div>
+                <div class="game-info-dock">
+                    <div>
+                        <div class="game-title-text">Dragon vs Tiger</div>
+                        <div class="game-sub-text">Live Dealer</div>
+                    </div>
+                    <div class="game-play-btn-circle"><i class="fa-solid fa-play"></i></div>
+                </div>
+            </div>
+
+            <!-- 5. 777 SLOTS (OPENS slots.html) -->
+            <div class="casino-game-card" data-cat="slots" onclick="launchCustomGame('slots777', 'Mega Slots 777', 'slots.html')">
+                <div class="game-thumb-wrapper">
+                    <img id="gameThumb_slots777" class="game-thumb-img" src="https://kappa.lol/UkrB8F" alt="Slots 777" onerror="this.src='https://kappa.lol/UkrB8F'">
+                    <div class="game-badge-hot">JACKPOT</div>
+                </div>
+                <div class="game-info-dock">
+                    <div>
+                        <div class="game-title-text">Mega Slots 777</div>
+                        <div class="game-sub-text">Free Spins • Jackpot</div>
+                    </div>
+                    <div class="game-play-btn-circle"><i class="fa-solid fa-play"></i></div>
+                </div>
+            </div>
+
+            <!-- 6. ROULETTE 3D (OPENS roulette.html) -->
+            <div class="casino-game-card" data-cat="live" onclick="launchCustomGame('roulette', 'European Roulette', 'roulette.html')">
+                <div class="game-thumb-wrapper">
+                    <img id="gameThumb_roulette" class="game-thumb-img" src="https://kappa.lol/mMolLg" alt="Roulette" onerror="this.src='https://kappa.lol/mMolLg'">
+                    <div class="game-badge-live"><i class="fa-solid fa-circle" style="font-size:6px;"></i> 3D</div>
+                </div>
+                <div class="game-info-dock">
+                    <div>
+                        <div class="game-title-text">European Roulette</div>
+                        <div class="game-sub-text">Classic Table</div>
+                    </div>
+                    <div class="game-play-btn-circle"><i class="fa-solid fa-play"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TOP 10 HIGH ROLLERS LEADERBOARD (DYNAMIC 2.5-MIN ROTATION)-->
+        <!-- ======================================================== -->
+        <div class="home-leaderboard-section">
+            <div class="leaderboard-header">
+                <div class="leaderboard-header-title">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>টপ ১০ লিডারবোর্ড (Top 10 High Rollers)</span>
+                </div>
+                <div class="leaderboard-live-pill">
+                    <i class="fa-solid fa-bolt"></i> লাইভ আপডেট
+                </div>
+            </div>
+            <div class="leaderboard-list" id="homeLeaderboardList"></div>
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 2.1 EXTERNAL / MODULAR IN-APP GAME FRAME (IFRAME)        -->
+    <!-- ======================================================== -->
+    <div id="view-external-game" class="app-view">
+        <div class="external-game-nav">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="nav-back-btn" onclick="closeExternalGameFrame()"><i class="fa-solid fa-arrow-left"></i></div>
+                <h3 id="externalGameTitle" style="font-size:15px; font-weight:800; color:#fff;">Game</h3>
+            </div>
+            <div class="home-balance-chip" style="font-size:12px; padding:4px 10px;">
+                ৳<span id="externalGameBalance">0.00</span>
+            </div>
+        </div>
+        <iframe id="externalGameIframe" class="external-game-iframe" src="about:blank"></iframe>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 3. PROFILE VIEW                                          -->
+    <!-- ======================================================== -->
+    <div id="view-profile" class="app-view">
+        <div class="profile-top-banner">
+            <div class="profile-user-card">
+                <div class="avatar-wrap-rel" onclick="triggerAvatarUpload()" title="গ্যালারি থেকে ছবি পরিবর্তন করুন">
+                    <img id="profileUserAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" class="profile-avatar" alt="Avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'">
+                    <div class="avatar-edit-icon"><i class="fa-solid fa-camera"></i></div>
+                </div>
+                <div class="user-text-meta">
+                    <h2>
+                        <span id="profileUsername">MEMBER0000</span>
+                        <span class="badge-vip" id="profileVipBadge"><i class="fa-solid fa-star"></i> VIP0</span>
+                    </h2>
+                    <div class="uid-string">
+                        UID | <span id="profileUID">0000000</span>
+                        <i class="fa-regular fa-copy" style="cursor:pointer;" onclick="copyData('profileUID', 'UID')"></i>
+                    </div>
+                    <div class="time-string">Last login: <span id="profileLastLogin">2026-10-25 00:00:00</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="balance-card-elevated">
+            <div class="balance-head-label">Total balance</div>
+            <div class="balance-amount-row">
+                <div class="balance-amount-val">৳<span id="profileBalanceVal">0.00</span></div>
+                <i class="fa-solid fa-arrows-rotate btn-balance-refresh" onclick="syncUserDataFromFirebase()"></i>
+            </div>
+            <div class="icon-actions-bar">
+                <div class="icon-action-item" onclick="switchToView('view-bonus')">
+                    <div class="action-bubble bg-bonus"><i class="fa-solid fa-gift"></i></div>
+                    <span>Bonus</span>
+                </div>
+                <div class="icon-action-item" onclick="switchToView('view-deposit')">
+                    <div class="action-bubble bg-deposit"><i class="fa-solid fa-hard-hat"></i></div>
+                    <span>Deposit</span>
+                </div>
+                <div class="icon-action-item" onclick="switchToView('view-withdraw')">
+                    <div class="action-bubble bg-withdraw"><i class="fa-solid fa-credit-card"></i></div>
+                    <span>Withdraw</span>
+                </div>
+                <div class="icon-action-item" onclick="openSupportModal()">
+                    <div class="action-bubble bg-vip"><i class="fa-solid fa-headset"></i></div>
+                    <span>Support</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safe Balance Box Tile -->
+        <div class="safe-banner-tile" onclick="switchToView('view-safebox')">
+            <div class="safe-tile-left">
+                <div class="safe-sun-icon"><i class="fa-solid fa-vault"></i></div>
+                <div>
+                    <div class="safe-headline">সেফ ব্যালেন্স বক্স (Safe Balance Box)</div>
+                    <div class="safe-subtitle">১০০ টাকায় প্রতিদিন ৫ টাকা সুদ (৫%)! প্রতিদিন সকাল ৮:০০ টায় অটোমেটিক যোগ হবে।</div>
+                </div>
+            </div>
+            <div class="safe-tile-right">৳<span id="profileSafeBoxPreview">0.00</span> <i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+
+        <!-- 2x2 Grid -->
+        <div class="profile-grid-2x2">
+            <div class="grid-card-node" onclick="switchToView('view-game-history')">
+                <div class="grid-node-icon" style="background:#e8f4fd; color:#2980b9;">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <div class="grid-node-text">
+                    <h4>Game History</h4>
+                    <p>My game history</p>
+                </div>
+            </div>
+            <div class="grid-card-node" onclick="switchToView('view-transactions')">
+                <div class="grid-node-icon" style="background:#eafaf1; color:#27ae60;">
+                    <i class="fa-solid fa-money-bill-transfer"></i>
+                </div>
+                <div class="grid-node-text">
+                    <h4>Transaction</h4>
+                    <p>My transaction history</p>
+                </div>
+            </div>
+            <div class="grid-card-node" onclick="switchToView('view-deposit-history')">
+                <div class="grid-node-icon" style="background:#fdebd0; color:#e74c3c;">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div class="grid-node-text">
+                    <h4>Deposit</h4>
+                    <p>My deposit history</p>
+                </div>
+            </div>
+            <div class="grid-card-node" onclick="switchToView('view-withdraw-history')">
+                <div class="grid-node-icon" style="background:#fef5e7; color:#f39c12;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="grid-node-text">
+                    <h4>Withdraw</h4>
+                    <p>My withdraw history</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- List Section -->
+        <div class="profile-list-block">
+            <div class="list-row-cell" onclick="switchToView('view-notifications')">
+                <div class="list-left-content">
+                    <i class="fa-regular fa-envelope" style="color:#f39c12; font-size:18px;"></i>
+                    Notification
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="bubble-badge" id="notifBadge">0</span>
+                    <i class="fa-solid fa-chevron-right" style="color:#bbb;"></i>
+                </div>
+            </div>
+            <div class="list-row-cell" onclick="switchToView('view-gifts')">
+                <div class="list-left-content">
+                    <i class="fa-solid fa-gift" style="color:#f1c40f; font-size:18px;"></i>
+                    Gifts & Redeem
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color:#bbb;"></i>
+            </div>
+            <div class="list-row-cell" onclick="openSupportModal()">
+                <div class="list-left-content" style="color:#2980b9;">
+                    <i class="fa-solid fa-comments" style="font-size:18px;"></i>
+                    24/7 কাস্টমার সার্ভিস
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color:#bbb;"></i>
+            </div>
+            <div class="list-row-cell" onclick="performLogout()">
+                <div class="list-left-content" style="color:#e74c3c;">
+                    <i class="fa-solid fa-right-from-bracket" style="font-size:18px;"></i>
+                    লগআউট (Logout)
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color:#bbb;"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!-- 4. SUBPAGES & MODALS                                     -->
+    <!-- ======================================================== -->
+
+    <!-- SUBPAGE: BONUS HUB -->
+    <div id="view-bonus" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>DKWIN বোনাস হাব (Bonus Rewards)</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper">
+            <div class="bonus-section-title"><i class="fa-solid fa-coins" style="color:#f5b700;"></i> প্রথম ডিপোজিট ক্যাশ বোনাস</div>
+            <div class="bonus-grid-cards">
+                <div class="bonus-card-box">
+                    <h5>১ম ডিপোজিট ৳১০০</h5>
+                    <div class="bonus-reward">+৳৫</div>
+                    <button class="bonus-btn" id="btnFdb100" onclick="claimFirstDepositBonus(100, 5)">ক্লেইম করুন</button>
+                </div>
+                <div class="bonus-card-box">
+                    <h5>১ম ডিপোজিট ৳৫০০</h5>
+                    <div class="bonus-reward">+৳২০</div>
+                    <button class="bonus-btn" id="btnFdb500" onclick="claimFirstDepositBonus(500, 20)">ক্লেইম করুন</button>
+                </div>
+                <div class="bonus-card-box">
+                    <h5>১ম ডিপোজিট ৳১,০০০</h5>
+                    <div class="bonus-reward">+৳৫০</div>
+                    <button class="bonus-btn" id="btnFdb1000" onclick="claimFirstDepositBonus(1000, 50)">ক্লেইম করুন</button>
+                </div>
+                <div class="bonus-card-box">
+                    <h5>১ম ডিপোজিট ৳৫,০০০</h5>
+                    <div class="bonus-reward">+৳১০০</div>
+                    <button class="bonus-btn" id="btnFdb5000" onclick="claimFirstDepositBonus(5000, 100)">ক্লেইম করুন</button>
+                </div>
+            </div>
+
+            <div class="bonus-section-title"><i class="fa-solid fa-crown" style="color:#f39c12;"></i> ভিআইপি লেভেল বোনাস (VIP Rewards)</div>
+            <div style="font-size:11.5px; color:#666; margin-bottom:12px;">আপনার মোট লাইফটাইম বেটিং: <strong style="color:#2ecc71;">৳<span id="vipTotalWageredDisplay">0.00</span></strong></div>
+
+            <div class="vip-reward-card">
+                <div class="vip-card-header">
+                    <strong><i class="fa-solid fa-star" style="color:#f5b700;"></i> VIP 1 বোনাস</strong>
+                    <span style="color:#e67e22; font-weight:800; font-size:15px;">৳৩০</span>
+                </div>
+                <div style="font-size:11px; color:#777;">শর্ত: ৫,০০০ টাকার বেটিং সম্পন্ন করুন</div>
+                <div class="turnover-progress-bar-bg">
+                    <div class="turnover-progress-bar-fill" id="vip1ProgressBar"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                    <span style="font-size:10px; color:#888;" id="vip1ProgressText">৳0 / ৳5,000</span>
+                    <button class="bonus-btn" style="width:auto; padding:4px 14px;" id="btnVip1Claim" onclick="claimVipBonus(1, 5000, 30)">Claim ৳30</button>
+                </div>
+            </div>
+
+            <div class="vip-reward-card">
+                <div class="vip-card-header">
+                    <strong><i class="fa-solid fa-star" style="color:#f5b700;"></i> VIP 2 বোনাস</strong>
+                    <span style="color:#e67e22; font-weight:800; font-size:15px;">৳৩০০</span>
+                </div>
+                <div style="font-size:11px; color:#777;">শর্ত: ২০,০০০ টাকার বেটিং সম্পন্ন করুন</div>
+                <div class="turnover-progress-bar-bg">
+                    <div class="turnover-progress-bar-fill" id="vip2ProgressBar"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                    <span style="font-size:10px; color:#888;" id="vip2ProgressText">৳0 / ৳20,000</span>
+                    <button class="bonus-btn" style="width:auto; padding:4px 14px;" id="btnVip2Claim" onclick="claimVipBonus(2, 20000, 300)">Claim ৳300</button>
+                </div>
+            </div>
+
+            <div class="vip-reward-card">
+                <div class="vip-card-header">
+                    <strong><i class="fa-solid fa-star" style="color:#f5b700;"></i> VIP 3 বোনাস</strong>
+                    <span style="color:#e67e22; font-weight:800; font-size:15px;">৳১,০০০</span>
+                </div>
+                <div style="font-size:11px; color:#777;">শর্ত: ৫০,০০০ টাকার বেটিং সম্পন্ন করুন</div>
+                <div class="turnover-progress-bar-bg">
+                    <div class="turnover-progress-bar-fill" id="vip3ProgressBar"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                    <span style="font-size:10px; color:#888;" id="vip3ProgressText">৳0 / ৳50,000</span>
+                    <button class="bonus-btn" style="width:auto; padding:4px 14px;" id="btnVip3Claim" onclick="claimVipBonus(3, 50000, 1000)">Claim ৳1,000</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBPAGE: SAFE BALANCE BOX -->
+    <div id="view-safebox" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>সেফ ব্যালেন্স বক্স (Safe Balance Box)</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper">
+            <div class="safebox-balance-card">
+                <div class="safebox-daily-badge"><i class="fa-solid fa-shield-halved"></i> প্রতিদিন ৫% সুদ (১০০ টাকায় ৫ টাকা)</div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <div>
+                        <div style="font-size:11px; color:#94a3b8;">মূল ওয়ালেট ব্যালেন্স:</div>
+                        <div style="font-size:18px; font-weight:800; color:#fff;">৳<span id="safeboxMainWalletBalance">0.00</span></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:11px; color:#94a3b8;">সেফ বক্সে জমা ব্যালেন্স:</div>
+                        <div style="font-size:22px; font-weight:800; color:#f5b700;">৳<span id="safeboxActiveAmountDisplay">0.00</span></div>
+                    </div>
+                </div>
+                
+                <div class="safebox-card-meta">
+                    <div>
+                        <div style="font-size:11px; color:#94a3b8;">দৈনিক প্রাপ্তব্য সুদ (৫%):</div>
+                        <strong style="color:#2ed573; font-size:14px;">+৳<span id="safeboxDailyGainPreview">0.00</span>/দিন</strong>
+                    </div>
+                    <div>
+                        <div style="font-size:11px; color:#94a3b8;">সুদ যোগ হওয়ার সময়:</div>
+                        <strong style="color:#fff; font-size:13px;"><i class="fa-regular fa-clock"></i> সকাল ০৮:০০ টা</strong>
+                    </div>
+                </div>
+
+                <button id="btnClaimToWallet" class="auth-action-btn" style="background:#2ecc71; color:#fff; margin-top:16px; box-shadow:0 4px 15px rgba(46, 213, 115, 0.4);" onclick="handleClaimSafeBalanceToWallet()">
+                    <i class="fa-solid fa-money-bill-transfer"></i> ওয়ালেটে ট্রান্সফার করুন (Claim to Wallet)
+                </button>
+            </div>
+
+            <div class="auth-box-card" style="box-shadow:none; border:1px solid #e2e8f0;">
+                <h4 style="font-size:14px; color:#222; margin-bottom:6px;"><i class="fa-solid fa-lock" style="color:var(--primary-dark-yellow);"></i> সেফ বক্সে টাকা জমা করুন</h4>
+                <p style="font-size:11px; color:#666; margin-bottom:14px;">আপনার মূল ওয়ালেট থেকে টাকা সেফ বক্সে রেখে প্রতিদিন নিশ্চিত ৫% আয় উপভোগ করুন।</p>
+
+                <div class="auth-field">
+                    <label>কত টাকা সেভ করতে চান?</label>
+                    <div class="auth-input-rel">
+                        <i class="fa-solid fa-bangladeshi-taka-sign"></i>
+                        <input type="number" id="safeboxDepositInput" class="auth-input" placeholder="টাকার পরিমাণ দিন (যেমন: ৫০০)" oninput="calculateSafeBoxLiveInterestPreview()">
+                    </div>
+                </div>
+
+                <div style="background:#fff9e6; border:1px dashed #f5b700; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:12px;">
+                    <div style="display:flex; justify-content:space-between; color:#b7791f; font-weight:700;">
+                        <span>দৈনিক সুদ (৫% হারে):</span>
+                        <span>+৳<span id="safeboxInputGainPreview">0.00</span></span>
+                    </div>
+                    <div style="font-size:10.5px; color:#888; margin-top:4px;">*প্রতিদিন সকাল ৮:০০ টায় এই সুদ স্বয়ংক্রিয়ভাবে সেফ ব্যালেন্সে যুক্ত হবে।</div>
+                </div>
+
+                <button class="auth-action-btn" onclick="handleDepositToSafeBox()">কনফার্ম করুন (Continue)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBPAGE: DEPOSIT -->
+    <div id="view-deposit" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-home')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Deposit Funds (টাকা জমা)</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper">
+            <div class="page-block-label">1. Deposit Amount (<span id="depLimitsDisplay">সর্বনিম্ন ১০০ - সর্বোচ্চ ৫০,০০০</span>):</div>
+            <input type="number" id="depAmountBox" class="auth-input" style="font-size:18px; font-weight:800; margin-bottom:14px;" value="500">
+
+            <div class="page-block-label">2. Select Payment Method:</div>
+            <div class="grid-method-selector">
+                <div class="method-choice-card active" onclick="pickDepositMethod('bKash', this)">
+                    <i class="fa-solid fa-mobile-screen-button" style="color:#e2136e;"></i>
+                    <span>bKash</span>
+                </div>
+                <div class="method-choice-card" onclick="pickDepositMethod('Nagad', this)">
+                    <i class="fa-solid fa-money-bill-wave" style="color:#f7941d;"></i>
+                    <span>Nagad</span>
+                </div>
+                <div class="method-choice-card" onclick="pickDepositMethod('Rocket', this)">
+                    <i class="fa-solid fa-paper-plane" style="color:#8c148c;"></i>
+                    <span>Rocket</span>
+                </div>
+                <div class="method-choice-card" onclick="pickDepositMethod('Upay', this)">
+                    <i class="fa-solid fa-wallet" style="color:#00a3e0;"></i>
+                    <span>Upay</span>
+                </div>
+            </div>
+
+            <div class="wallet-copy-strip">
+                <div>
+                    <div style="font-size:11px; color:#888;">আমাদের <span id="depMethodName">bKash</span> ওয়ালেট নাম্বার:</div>
+                    <strong id="adminWalletNum">01712345678</strong>
+                </div>
+                <button class="btn-copy-bubble" onclick="copyData('adminWalletNum', 'Admin Number')">কপি করুন</button>
+            </div>
+
+            <div class="instructions-box-styled">
+                <h5>টাকা পাঠানোর নিয়মাবলী:</h5>
+                ১. উপরে উল্লেখিত আমাদের নাম্বারে আপনার বিকাশ/নগদ অ্যাপ থেকে "Send Money" বা "Cash Out" করুন।<br>
+                ২. টাকা সফলভাবে পাঠানোর পর TrxID কপি করে নিচের বক্সে দিন।<br>
+                ৩. অ্যাডমিন প্যানেল ভেরিফাই করে অবিলম্বে আপনার অ্যাকাউন্টে টাকা যোগ করে দেবে।
+            </div>
+
+            <div class="page-block-label">3. Enter Transaction ID (TrxID):</div>
+            <input type="text" id="depTrxBox" class="auth-input" style="font-size:15px; letter-spacing:1px; margin-bottom:15px;" placeholder="যেমন: 9JDFK83HD">
+
+            <button class="auth-action-btn" onclick="submitDepositForm()">ডিপোজিট সাবমিট করুন</button>
+        </div>
+    </div>
+
+    <!-- SUBPAGE: WITHDRAW -->
+    <div id="view-withdraw" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-home')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Withdraw Funds (টাকা উত্তোলন)</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper">
+            <div class="turnover-status-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="font-size:13px; color:#111;"><i class="fa-solid fa-shield-halved" style="color:#f5b700;"></i> টার্নওভার স্ট্যাটাস (Wagering)</strong>
+                    <span id="turnoverBadge" class="status-pill status-pending">চেক হচ্ছে...</span>
+                </div>
+                <div class="turnover-progress-bar-bg">
+                    <div class="turnover-progress-bar-fill" id="turnoverProgressBarFill"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#555;">
+                    <span>লাস্ট ডিপোজিট: <strong>৳<span id="turnoverLastDepVal">0</span></strong></span>
+                    <span>প্রয়োজনীয় বেটিং: <strong>৳<span id="turnoverTargetVal">0</span></strong></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#555; margin-top:4px;">
+                    <span>সম্পন্ন করা বেটিং: <strong style="color:#2ecc71;">৳<span id="turnoverDoneVal">0</span></strong></span>
+                    <span>বাকি আছে: <strong style="color:#e74c3c;">৳<span id="turnoverRemainingVal">0</span></strong></span>
+                </div>
+            </div>
+
+            <div class="page-block-label">1. Select Withdrawal Method:</div>
+            <div class="grid-method-selector">
+                <div class="method-choice-card active" onclick="pickWithdrawMethod('bKash', this)">
+                    <i class="fa-solid fa-mobile-screen-button" style="color:#e2136e;"></i>
+                    <span>bKash</span>
+                </div>
+                <div class="method-choice-card" onclick="pickWithdrawMethod('Nagad', this)">
+                    <i class="fa-solid fa-money-bill-wave" style="color:#f7941d;"></i>
+                    <span>Nagad</span>
+                </div>
+                <div class="method-choice-card" onclick="pickWithdrawMethod('Rocket', this)">
+                    <i class="fa-solid fa-paper-plane" style="color:#8c148c;"></i>
+                    <span>Rocket</span>
+                </div>
+                <div class="method-choice-card" onclick="pickWithdrawMethod('Upay', this)">
+                    <i class="fa-solid fa-wallet" style="color:#00a3e0;"></i>
+                    <span>Upay</span>
+                </div>
+            </div>
+
+            <div class="page-block-label">2. Withdraw Amount (<span id="withLimitsDisplay">সর্বনিম্ন ১০০ - সর্বোচ্চ ২৫,০০০</span>):</div>
+            <input type="number" id="withAmountBox" class="auth-input" placeholder="টাকার অংক দিন" style="margin-bottom:14px;">
+
+            <div class="page-block-label">3. Your Personal Account Number:</div>
+            <input type="tel" id="withPhoneBox" class="auth-input" placeholder="01XXXXXXXXX" style="margin-bottom:14px;">
+
+            <div class="warning-box-styled">
+                <h5>কড়া সতর্কতা:</h5>
+                - লাস্ট ডিপোজিটের ১০০% বেটিং সম্পন্ন না হওয়া পর্যন্ত উইথড্র রিকোয়েস্ট গ্রহণযোগ্য হবে না।<br>
+                - আপনার ওয়ালেট নাম্বারটি সঠিকভাবে দিন। ভুল নাম্বারে টাকা গেলে প্ল্যাটফর্ম দায়ী থাকবে না।
+            </div>
+
+            <button class="auth-action-btn" style="background:linear-gradient(135deg, #e74c3c, #c0392b); color:#fff;" onclick="submitWithdrawForm()">উইথড্র রিকোয়েস্ট পাঠান</button>
+        </div>
+    </div>
+
+    <!-- SUBPAGE: DEPOSIT HISTORY -->
+    <div id="view-deposit-history" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Deposit History</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper" id="depositHistoryContent"></div>
+    </div>
+
+    <!-- SUBPAGE: WITHDRAW HISTORY -->
+    <div id="view-withdraw-history" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Withdraw History</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper" id="withdrawHistoryContent"></div>
+    </div>
+
+    <!-- SUBPAGE: TRANSACTIONS -->
+    <div id="view-transactions" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Transaction Ledger</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper" id="transactionsContent"></div>
+    </div>
+
+    <!-- SUBPAGE: GAME HISTORY -->
+    <div id="view-game-history" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Game History</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper" id="gameHistoryContent"></div>
+    </div>
+
+    <!-- SUBPAGE: GIFTS -->
+    <div id="view-gifts" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Redeem Gift Code</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper">
+            <div style="text-align:center; padding: 25px 0;">
+                <i class="fa-solid fa-gift" style="font-size: 55px; color: #f1c40f; margin-bottom: 12px;"></i>
+                <h4 style="font-size: 17px; color: #333;">স্পেশাল গিফট ভাউচার</h4>
+                <p style="font-size: 12px; color: #777;">এডমিন প্যানেল থেকে দেওয়া প্রোমো কোড দিয়ে ফ্রি ব্যালেন্স নিন।</p>
+            </div>
+            <input type="text" id="giftVoucherInput" class="auth-input" style="text-transform:uppercase; letter-spacing:2px; text-align:center; font-size:16px; margin-bottom:15px;" placeholder="যেমন: BONUS500">
+            <button class="auth-action-btn" onclick="redeemVoucherAction()">গিফট ব্যালেন্স গ্রহণ করুন</button>
+        </div>
+    </div>
+
+    <!-- SUBPAGE: NOTIFICATIONS -->
+    <div id="view-notifications" class="app-view">
+        <div class="subpage-nav">
+            <div class="nav-back-btn" onclick="switchToView('view-profile')"><i class="fa-solid fa-arrow-left"></i></div>
+            <h3>Notifications</h3>
+            <div style="width:32px;"></div>
+        </div>
+        <div class="page-content-wrapper" id="notificationsContent"></div>
+    </div>
+
+    <!-- SUPPORT MODAL -->
+    <div class="modal-support-sheet" id="supportModal">
+        <div class="support-modal-box">
+            <i class="fa-solid fa-headset" style="font-size: 45px; color: var(--primary-dark-yellow); margin-bottom: 12px;"></i>
+            <h3 style="font-size: 17px; color: #111; margin-bottom: 6px;">২৪/৭ কাস্টমার সাপোর্ট</h3>
+            <p style="font-size: 12px; color: #666; margin-bottom: 20px;">যেকোনো সমস্যা বা তথ্যের জন্য আমাদের অফিশিয়াল সাপোর্টে যোগাযোগ করুন।</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="auth-action-btn" style="background:#229ed9; color:#fff;" onclick="openOfficialTelegram()">
+                    <i class="fa-brands fa-telegram"></i> টেলিগ্রাম সাপোর্ট (<span id="supportTgLabel">@AT_REFAT</span>)
+                </button>
+                <button class="auth-action-btn" style="background:#25d366; color:#fff;" onclick="openOfficialWhatsapp()">
+                    <i class="fa-brands fa-whatsapp"></i> হোয়াটসঅ্যাপ (<span id="supportWaLabel">01836614491</span>)
+                </button>
+                <button class="auth-action-btn" style="background:#eee; color:#333; box-shadow:none;" onclick="closeSupportModal()">বন্ধ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4-TAB BOTTOM NAVIGATION BAR -->
+    <div id="bottomNavBar">
+        <div class="nav-quad-item active" id="navItemHome" onclick="handleBottomNav('home')">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-quad-item" id="navItemGames" onclick="handleBottomNav('games')">
+            <i class="fa-solid fa-plane-departure"></i>
+            <span>Aviator</span>
+        </div>
+        <div class="nav-quad-item" id="navItemSafebox" onclick="handleBottomNav('safebox')">
+            <i class="fa-solid fa-vault"></i>
+            <span>Safe Box</span>
+        </div>
+        <div class="nav-quad-item" id="navItemProfile" onclick="handleBottomNav('profile')">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ======================================================== -->
+<!-- 5. JAVASCRIPT MASTER ENGINE                              -->
+<!-- ======================================================== -->
+<script>
+    /* =======================================================
+       0. WEB-ONLY DOWNLOAD BANNER DETECTOR (HIDES IN APK/WEBVIEW)
+       ======================================================= */
+    function checkAndToggleAppDownloadBanner() {
+        const banner = document.getElementById('topAppDownloadBanner');
+        if (!banner) return;
+
+        // ১. URL প্যারামিটার চেক (?is_app=true বা ?app=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const isParamApp = urlParams.get('is_app') === 'true' || urlParams.get('app') === '1' || urlParams.get('source') === 'app';
+
+        // ২. Android WebView চেক
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera || '';
+        const isWebView = /; wv\)/.test(userAgent) || /Android.*Version\/[0-9.]+/i.test(userAgent);
+
+        // ৩. Standalone (PWA / Installed App) মোড চেক
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        if (isParamApp || isWebView || isStandalone) {
+            banner.style.display = 'none';
+        }
+    }
+
+    function closeTopDownloadBanner() {
+        const banner = document.getElementById('topAppDownloadBanner');
+        if (banner) banner.style.display = 'none';
+    }
+
+    /* =======================================================
+       1. FIREBASE CONFIGURATION & CONNECTIVITY MONITOR
+       ======================================================= */
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeAEYWjBUHi76W2s3dIvu41CEu1wuXYxk",
+        authDomain: "avatar-game-335d4.firebaseapp.com",
+        projectId: "avatar-game-335d4",
+        storageBucket: "avatar-game-335d4.firebasestorage.app",
+        messagingSenderId: "848880921478",
+        appId: "1:848880921478:web:74461e00fe8a3edc129a07",
+        measurementId: "G-ST38JDVKQ4",
+        databaseURL: "https://avatar-game-335d4-default-rtdb.firebaseio.com"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
+
+    db.ref('.info/connected').on('value', snap => {
+        const isConnected = snap.val() === true;
+        const dot = document.getElementById('liveConnDot');
+        const text = document.getElementById('liveConnText');
+        if (isConnected) {
+            dot.className = 'status-dot';
+            text.innerText = 'সার্ভার: অনলাইন (লাইভ সিঙ্ক)';
+        } else {
+            dot.className = 'status-dot offline';
+            text.innerText = 'সার্ভার: অফলাইন (পুনঃসংযোগ হচ্ছে...)';
+        }
+    });
+
+    let serverClockOffset = 0;
+    db.ref('.info/serverTimeOffset').on('value', snap => {
+        serverClockOffset = snap.val() || 0;
+    });
+    function getGlobalSyncedTime() {
+        return Date.now() + serverClockOffset;
+    }
+
+    /* =======================================================
+       2. SYSTEM VARIABLES & SETTINGS LISTENERS
+       ======================================================= */
+    let currentUser = JSON.parse(localStorage.getItem('dk_active_user')) || null;
+    let activeDepMethod = 'bKash';
+    let activeWithMethod = 'bKash';
+
+    let appLimits = { minDeposit: 100, maxDeposit: 50000, minWithdraw: 100, maxWithdraw: 25000 };
+    db.ref('systemSettings/limits').on('value', snap => {
+        if (snap.exists()) {
+            appLimits = snap.val();
+            document.getElementById('depLimitsDisplay').innerText = `সর্বনিম্ন ${appLimits.minDeposit || 100} - সর্বোচ্চ ${appLimits.maxDeposit || 50000}`;
+            document.getElementById('withLimitsDisplay').innerText = `সর্বনিম্ন ${appLimits.minWithdraw || 100} - সর্বোচ্চ ${appLimits.maxWithdraw || 25000}`;
+        }
+    });
+
+    let adminWallets = { 'bKash': '01712345678', 'Nagad': '01812345678', 'Rocket': '01912345678', 'Upay': '01612345678' };
+    db.ref('systemSettings/adminWallets').on('value', snap => {
+        if (snap.exists()) {
+            adminWallets = snap.val();
+            updateDepositUI();
+        }
+    });
+
+    let dynamicSupportTg = 'AT_REFAT';
+    let dynamicSupportWa = '01836614491';
+
+    db.ref('systemSettings/supportTelegram').on('value', snap => {
+        if (snap.exists() && snap.val()) {
+            dynamicSupportTg = String(snap.val()).replace('@', '');
+            document.getElementById('supportTgLabel').innerText = '@' + dynamicSupportTg;
+        }
+    });
+
+    db.ref('systemSettings/supportWhatsapp').on('value', snap => {
+        if (snap.exists() && snap.val()) {
+            dynamicSupportWa = String(snap.val());
+            document.getElementById('supportWaLabel').innerText = dynamicSupportWa;
+        }
+    });
+
+    function openOfficialTelegram() { window.open(`https://t.me/${dynamicSupportTg}`, '_blank'); }
+    function openOfficialWhatsapp() {
+        const cleanNumber = dynamicSupportWa.replace(/[^0-9]/g, '');
+        const finalWa = cleanNumber.startsWith('88') ? cleanNumber : ('88' + cleanNumber);
+        window.open(`https://wa.me/${finalWa}`, '_blank');
+    }
+
+    db.ref('systemSettings/notice').on('value', snap => {
+        if (snap.exists() && snap.val()) {
+            document.getElementById('liveMarqueeNotice').innerText = snap.val();
+        }
+    });
+
+    function initEntryPopupNotice() {
+        db.ref('systemSettings/entryPopupNotice').once('value', snap => {
+            if (snap.exists()) {
+                const data = snap.val();
+                if (data && data.enabled !== false) {
+                    const titleElem = document.getElementById('entryNoticeTitle');
+                    const descElem = document.getElementById('entryNoticeDesc');
+                    const imgElem = document.getElementById('entryNoticeImage');
+
+                    if (data.title) titleElem.innerText = data.title;
+                    if (data.text) descElem.innerText = data.text;
+                    if (data.image && data.image.trim() !== '') {
+                        imgElem.src = data.image;
+                        imgElem.style.display = 'block';
+                    } else {
+                        imgElem.style.display = 'none';
+                    }
+
+                    document.getElementById('entryNoticeModal').style.display = 'flex';
+                }
+            }
+        });
+    }
+
+    function closeEntryNoticeModal() {
+        document.getElementById('entryNoticeModal').style.display = 'none';
+    }
+
+    /* =======================================================
+       3. CASINO LOBBY DYNAMIC BANNERS & SLIDER ENGINE
+       ======================================================= */
+    let bannerSlideIndex = 0;
+    let bannerSliderTimer = null;
+    let dynamicBannersList = [
+        "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=800&q=80"
+    ];
+
+    function initBannersListener() {
+        db.ref('systemSettings/banners').on('value', snap => {
+            if (snap.exists() && snap.val()) {
+                const val = snap.val();
+                if (Array.isArray(val) && val.length > 0) {
+                    dynamicBannersList = val.filter(b => b && typeof b === 'string' && b.trim() !== '');
+                } else if (typeof val === 'object') {
+                    dynamicBannersList = Object.values(val).filter(b => b && typeof b === 'string' && b.trim() !== '');
+                }
+            }
+            renderHomeBannersTrack();
+        });
+        renderHomeBannersTrack();
+    }
+
+    function renderHomeBannersTrack() {
+        const track = document.getElementById('bannerTrack');
+        const dotsBox = document.getElementById('bannerDotsBox');
+        if (!track || !dotsBox) return;
+
+        track.innerHTML = '';
+        dotsBox.innerHTML = '';
+
+        if (!dynamicBannersList.length) {
+            dynamicBannersList = [
+                "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=800&q=80"
+            ];
+        }
+
+        dynamicBannersList.forEach((src, idx) => {
+            const slide = document.createElement('div');
+            slide.className = 'banner-slide';
+            slide.innerHTML = `<img src="${src}" alt="Casino Ad Banner ${idx + 1}" onerror="this.src='https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80'">`;
+            track.appendChild(slide);
+
+            const dot = document.createElement('div');
+            dot.className = `banner-dot ${idx === 0 ? 'active' : ''}`;
+            dotsBox.appendChild(dot);
+        });
+
+        bannerSlideIndex = 0;
+        track.style.transform = `translateX(0%)`;
+
+        if (bannerSliderTimer) clearInterval(bannerSliderTimer);
+        bannerSliderTimer = setInterval(advanceBannerSlide, 4500);
+    }
+
+    function advanceBannerSlide() {
+        const track = document.getElementById('bannerTrack');
+        const dots = document.querySelectorAll('.banner-dot');
+        if (!track || dynamicBannersList.length <= 1) return;
+
+        bannerSlideIndex = (bannerSlideIndex + 1) % dynamicBannersList.length;
+        track.style.transform = `translateX(-${bannerSlideIndex * 100}%)`;
+
+        dots.forEach((d, idx) => {
+            d.classList.toggle('active', idx === bannerSlideIndex);
+        });
+    }
+
+    function initGameThumbnailsListener() {
+        db.ref('systemSettings/gameThumbs').on('value', snap => {
+            if (snap.exists() && snap.val()) {
+                const thumbs = snap.val();
+                Object.keys(thumbs).forEach(gameId => {
+                    const imgEl = document.getElementById(`gameThumb_${gameId}`);
+                    if (imgEl && thumbs[gameId] && thumbs[gameId].trim() !== '') {
+                        imgEl.src = thumbs[gameId];
+                    }
+                });
+            }
+        });
+    }
+
+    /* =======================================================
+       3.1 TOP 10 HIGH ROLLERS LEADERBOARD (DYNAMIC & ROTATING)
+       ======================================================= */
+    const avatarPool = [
+        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+        'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80'
+    ];
+
+    function generateDynamicLeaderboard() {
+        const board = document.getElementById('homeLeaderboardList');
+        if (!board) return;
+
+        let baseBet = Math.floor(3200000 + Math.random() * 1500000);
+        let items = [];
+
+        for (let i = 1; i <= 10; i++) {
+            const uid = Math.floor(1000000 + Math.random() * 8999999);
+            const phonePrefix = ['017', '018', '019', '016', '013'][Math.floor(Math.random() * 5)];
+            const phone = `${phonePrefix}***${Math.floor(1000 + Math.random() * 9000)}`;
+            const vipLevel = Math.max(2, 9 - Math.floor(i * 0.7));
+            const avatar = avatarPool[Math.floor(Math.random() * avatarPool.length)];
+
+            items.push({
+                rank: i,
+                uid: String(uid),
+                phone: phone,
+                vip: `VIP ${vipLevel}`,
+                amount: Math.round(baseBet),
+                avatar: avatar
+            });
+
+            baseBet -= Math.floor(180000 + Math.random() * 220000);
+        }
+
+        board.innerHTML = '';
+        items.forEach((item) => {
+            let rankClass = 'rank-normal';
+            let rankSymbol = `#${item.rank}`;
+
+            if (item.rank === 1) { rankClass = 'rank-gold'; rankSymbol = '<i class="fa-solid fa-crown"></i>'; }
+            else if (item.rank === 2) { rankClass = 'rank-silver'; rankSymbol = '<i class="fa-solid fa-medal"></i>'; }
+            else if (item.rank === 3) { rankClass = 'rank-bronze'; rankSymbol = '<i class="fa-solid fa-award"></i>'; }
+
+            board.innerHTML += `
+                <div class="leader-item-row">
+                    <div class="leader-rank-badge ${rankClass}">
+                        ${rankSymbol}
+                    </div>
+                    <div class="leader-avatar-wrap">
+                        <img class="leader-avatar-img" src="${item.avatar}" alt="Avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'">
+                    </div>
+                    <div class="leader-meta">
+                        <div class="leader-uid-line">
+                            <span>UID ${item.uid.substring(0, 4)}***</span>
+                            <span class="leader-vip-badge">${item.vip}</span>
+                        </div>
+                        <div class="leader-sub-text">${item.phone} • লাইভ প্লেয়ার</div>
+                    </div>
+                    <div class="leader-stats-right">
+                        <div class="leader-bet-amount">৳${item.amount.toLocaleString('en-IN')}</div>
+                        <div class="leader-bet-label">মোট বেটিং ভলিউম</div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function initLeaderboard() {
+        generateDynamicLeaderboard();
+        setInterval(generateDynamicLeaderboard, 150000); // প্রতি ২.৫ মিনিটে অটো রোটেট
+    }
+
+    /* Live Winners Feed Simulation */
+    const mockWinnerGames = ['Aviator', 'Win Go 1M', 'Mines', 'Dragon Tiger', 'Slots 777'];
+    setInterval(() => {
+        const ticker = document.getElementById('homeLiveWinnerTicker');
+        if (ticker) {
+            const randGame = mockWinnerGames[Math.floor(Math.random() * mockWinnerGames.length)];
+            const randAmt = (Math.floor(Math.random() * 45) + 5) * 100;
+            const randUser = '01' + Math.floor(100 + Math.random() * 900) + '***' + Math.floor(10 + Math.random() * 90);
+            ticker.innerHTML = `Member <strong>${randUser}</strong> won <strong>৳${randAmt.toLocaleString('en-IN')}.00</strong> in ${randGame}`;
+        }
+    }, 4000);
+
+    /* Category Filter for Games */
+    function filterHomeGames(category, tabBtn) {
+        document.querySelectorAll('.cat-tab-btn').forEach(b => b.classList.remove('active'));
+        tabBtn.classList.add('active');
+
+        const cards = document.querySelectorAll('.casino-game-card');
+        cards.forEach(card => {
+            const cardCat = card.getAttribute('data-cat');
+            if (category === 'all' || cardCat === category) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    /* =======================================================
+       3.2 MODULAR CUSTOM IN-APP GAME LAUNCHER (FOR aviator.html, go.html etc.)
+       ======================================================= */
+    let externalGamesConfig = {};
+    db.ref('systemSettings/games').on('value', snap => {
+        if (snap.exists()) {
+            externalGamesConfig = snap.val() || {};
+        }
+    });
+
+    function launchCustomGame(gameKey, title, defaultLocalFile) {
+        const customConfig = externalGamesConfig[gameKey] || {};
+        if (customConfig.maintenance === true) {
+            showToast(`${title} বর্তমানে আপগ্রেড চলছে, খুব শীঘ্রই চালু হবে!`, true);
+            return;
+        }
+
+        let targetUrl = customConfig.url || defaultLocalFile;
+        const separator = targetUrl.includes('?') ? '&' : '?';
+        const finalUrl = `${targetUrl}${separator}uid=${currentUser ? currentUser.uid : ''}&bal=${currentUser ? currentUser.balance : 0}`;
+
+        document.getElementById('externalGameTitle').innerText = title;
+        document.getElementById('externalGameIframe').src = finalUrl;
+        document.getElementById('externalGameBalance').innerText = parseFloat(currentUser ? currentUser.balance : 0).toFixed(2);
+
+        switchToView('view-external-game');
+    }
+
+    function closeExternalGameFrame() {
+        document.getElementById('externalGameIframe').src = 'about:blank';
+        switchToView('view-home');
+        syncUserDataFromFirebase();
+    }
+
+    /* =======================================================
+       4. INITIAL SETUP & UI HELPERS
+       ======================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+        checkAndToggleAppDownloadBanner();
+        initEntryPopupNotice();
+        initBannersListener();
+        initGameThumbnailsListener();
+        initLeaderboard();
+
+        if (!currentUser) {
+            document.getElementById('bottomNavBar').style.display = 'none';
+            switchToView('view-auth');
+        } else {
+            document.getElementById('bottomNavBar').style.display = 'flex';
+            attachUserFirebaseListeners(currentUser.uid);
+            renderProfileData();
+            switchToView('view-home');
+        }
+    });
+
+    function showSpinner(text) {
+        document.getElementById('spinnerText').innerText = text || 'লোড হচ্ছে...';
+        document.getElementById('globalSpinner').style.display = 'flex';
+    }
+
+    function hideSpinner() {
+        document.getElementById('globalSpinner').style.display = 'none';
+    }
+
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('appToast');
+        const text = document.getElementById('toastMsg');
+        const icon = document.getElementById('toastIcon');
+
+        text.innerText = msg;
+        icon.className = isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
+        icon.style.color = isError ? '#e74c3c' : '#2ecc71';
+
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3400);
+    }
+
+    function copyData(elementId, label) {
+        const val = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(val);
+        showToast(`${label} কপি করা হয়েছে: ${val}`);
+    }
+
+    function openSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
+    function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
+
+    /* =======================================================
+       5. USER, BAN & INSTANT NOTIFICATION LISTENERS
+       ======================================================= */
+    let isInitialNotifLoaded = false;
+
+    function attachUserFirebaseListeners(uid) {
+        const userRef = db.ref('users/' + uid);
+
+        userRef.on('value', snapshot => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+
+                if (data.isBanned === true) {
+                    alert('আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Ban) করা হয়েছে।');
+                    performLogout(true);
+                    return;
+                }
+
+                currentUser.balance = parseFloat(data.balance || 0);
+                currentUser.safeBalance = parseFloat(data.safeBalance || 0);
+                currentUser.lastSafeInterestDate = data.lastSafeInterestDate || '';
+                currentUser.username = data.username || currentUser.username;
+                currentUser.vip = data.vip || 'VIP0';
+                currentUser.lastLogin = data.lastLogin || currentUser.lastLogin;
+                currentUser.avatar = data.avatar || currentUser.avatar;
+
+                currentUser.lastDepositAmount = parseFloat(data.lastDepositAmount || 0);
+                currentUser.wagerRequired = parseFloat(data.wagerRequired || 0);
+                currentUser.wagerDone = parseFloat(data.wagerDone || 0);
+                currentUser.totalWagered = parseFloat(data.totalWagered || 0);
+                currentUser.claimedBonuses = data.claimedBonuses || {};
+
+                localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+                refreshAppBalance();
+                renderProfileData();
+                renderSafeBoxDetailsUI();
+                renderTurnoverStatusUI();
+                renderBonusHubUI();
+
+                checkAndCreditSafeBoxInterestAutomated();
+            }
+        });
+
+        const notifRef = db.ref('users/' + uid + '/notifications');
+        notifRef.on('child_added', snapshot => {
+            if (isInitialNotifLoaded) {
+                const notif = snapshot.val();
+                showToast(`🔔 ${notif.title}: ${notif.message}`);
+            }
+        });
+
+        notifRef.on('value', snapshot => {
+            const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+            document.getElementById('notifBadge').innerText = count;
+            isInitialNotifLoaded = true;
+        });
+    }
+
+    function syncUserDataFromFirebase() {
+        if (!currentUser) return;
+        showSpinner('ব্যালেন্স সিঙ্ক হচ্ছে...');
+        db.ref('users/' + currentUser.uid).once('value').then(snapshot => {
+            hideSpinner();
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                currentUser.balance = parseFloat(data.balance || 0);
+                currentUser.safeBalance = parseFloat(data.safeBalance || 0);
+                refreshAppBalance();
+                renderSafeBoxDetailsUI();
+                renderTurnoverStatusUI();
+                showToast('ব্যালেন্স সফলভাবে আপডেট হয়েছে!');
+            }
+        }).catch(() => hideSpinner());
+    }
+
+    function refreshAppBalance() {
+        if (!currentUser) return;
+        const formatted = parseFloat(currentUser.balance).toFixed(2);
+        document.getElementById('profileBalanceVal').innerText = formatted;
+        document.getElementById('homeBalanceVal').innerText = formatted;
+        
+        const extBal = document.getElementById('externalGameBalance');
+        if (extBal) extBal.innerText = formatted;
+
+        const sMain = document.getElementById('safeboxMainWalletBalance');
+        if (sMain) sMain.innerText = formatted;
+    }
+
+    function renderProfileData() {
+        if (!currentUser) return;
+        const defaultAvatar = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80";
+        const currentAvatar = (currentUser.avatar && currentUser.avatar.trim() !== '') ? currentUser.avatar : defaultAvatar;
+
+        document.getElementById('profileUsername').innerText = currentUser.username;
+        document.getElementById('profileUID').innerText = currentUser.uid;
+        document.getElementById('profileLastLogin').innerText = currentUser.lastLogin;
+        
+        const profileImg = document.getElementById('profileUserAvatar');
+        if (profileImg) profileImg.src = currentAvatar;
+
+        const homeTiny = document.getElementById('homeUserAvatarTiny');
+        if (homeTiny) homeTiny.src = currentAvatar;
+
+        document.getElementById('profileVipBadge').innerHTML = `<i class="fa-solid fa-star"></i> ${currentUser.vip || 'VIP0'}`;
+        
+        const safeFormatted = parseFloat(currentUser.safeBalance || 0).toFixed(2);
+        document.getElementById('profileSafeBoxPreview').innerText = safeFormatted;
+    }
+
+    /* =======================================================
+       6. GALLERY PROFILE PICTURE UPLOAD
+       ======================================================= */
+    function triggerAvatarUpload() {
+        document.getElementById('avatarFileInput').click();
+    }
+
+    function handleAvatarUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            showToast('অনুগ্রহ করে সঠিক ছবি ফাইল সিলেক্ট করুন!', true);
+            return;
+        }
+
+        showSpinner('ছবি প্রসেস হচ্ছে...');
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 260;
+                const MAX_HEIGHT = 260;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                db.ref('users/' + currentUser.uid).update({ avatar: compressedBase64 }).then(() => {
+                    currentUser.avatar = compressedBase64;
+                    localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+                    
+                    document.getElementById('profileUserAvatar').src = compressedBase64;
+                    const homeTiny = document.getElementById('homeUserAvatarTiny');
+                    if (homeTiny) homeTiny.src = compressedBase64;
+
+                    hideSpinner();
+                    showToast('প্রোফাইল ছবি সফলভাবে আপডেট করা হয়েছে!');
+                }).catch(err => {
+                    hideSpinner();
+                    showToast('ছবি আপলোডে ত্রুটি: ' + err.message, true);
+                });
+            };
+            img.onerror = function() {
+                hideSpinner();
+                showToast('ছবিটি লোড করা যায়নি, পুনরায় চেষ্টা করুন!', true);
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* =======================================================
+       7. VIEW ROUTING & AUTHENTICATION
+       ======================================================= */
+    function switchToView(viewId) {
+        document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById(viewId);
+        if (target) {
+            target.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        if (currentUser) {
+            document.getElementById('bottomNavBar').style.display = (viewId === 'view-external-game') ? 'none' : 'flex';
+            document.getElementById('navItemHome').classList.toggle('active', viewId === 'view-home');
+            document.getElementById('navItemGames').classList.toggle('active', false);
+            document.getElementById('navItemSafebox').classList.toggle('active', viewId === 'view-safebox');
+            document.getElementById('navItemProfile').classList.toggle('active', viewId === 'view-profile');
+        } else {
+            document.getElementById('bottomNavBar').style.display = 'none';
+        }
+
+        if (viewId === 'view-deposit-history') loadDepositHistory();
+        if (viewId === 'view-withdraw-history') loadWithdrawHistory();
+        if (viewId === 'view-transactions') loadTransactions();
+        if (viewId === 'view-game-history') loadGameHistory();
+        if (viewId === 'view-notifications') loadNotifications();
+        if (viewId === 'view-deposit') updateDepositUI();
+        if (viewId === 'view-safebox') renderSafeBoxDetailsUI();
+        if (viewId === 'view-withdraw') renderTurnoverStatusUI();
+        if (viewId === 'view-bonus') renderBonusHubUI();
+    }
+
+    function handleBottomNav(dest) {
+        if (dest === 'home') switchToView('view-home');
+        if (dest === 'games') launchCustomGame('aviator', 'Aviator Pro', 'aviator.html'); // এভিয়েটর ফ্রেম চালু হবে
+        if (dest === 'safebox') switchToView('view-safebox');
+        if (dest === 'profile') switchToView('view-profile');
+    }
+
+    function switchAuthMode(mode) {
+        document.querySelectorAll('.auth-pill-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('forgotStepBox').style.display = 'none';
+
+        if (mode === 'login') {
+            document.querySelectorAll('.auth-pill-btn')[0].classList.add('active');
+            document.getElementById('authLoginForm').style.display = 'block';
+            document.getElementById('authRegisterForm').style.display = 'none';
+        } else {
+            document.querySelectorAll('.auth-pill-btn')[1].classList.add('active');
+            document.getElementById('authLoginForm').style.display = 'none';
+            document.getElementById('authRegisterForm').style.display = 'block';
+        }
+    }
+
+    function handleUserRegister(e) {
+        e.preventDefault();
+        const email = document.getElementById('regEmailField').value.trim().toLowerCase();
+        let phone = document.getElementById('regPhoneField').value.trim().replace(/[^0-9]/g, '');
+        const pass = document.getElementById('regPassField').value;
+        const cpass = document.getElementById('regConfirmPassField').value;
+
+        if (phone.length < 11) {
+            showToast('সঠিক ১১ ডিজিটের মোবাইল নাম্বার দিন!', true);
+            return;
+        }
+        if (pass !== cpass) {
+            showToast('পাসওয়ার্ড দুটি মিলছে না!', true);
+            return;
+        }
+        if (pass.length < 6) {
+            showToast('পাসওয়ার্ড কমপক্ষে ৬ সংখ্যার হতে হবে!', true);
+            return;
+        }
+
+        showSpinner('রেজিস্ট্রেশন হচ্ছে...');
+
+        db.ref('users').orderByChild('phone').equalTo(phone).once('value', snapshot => {
+            if (snapshot.exists()) {
+                hideSpinner();
+                showToast('এই মোবাইল নাম্বারটি ইতিমধ্যে ব্যবহৃত হয়েছে!', true);
+                return;
+            }
+
+            const uid = Math.floor(1000000 + Math.random() * 9000000);
+            const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+            const newUser = {
+                uid: String(uid),
+                username: 'MEMBER' + Math.random().toString(36).substring(2, 7).toUpperCase(),
+                email: email,
+                phone: phone,
+                password: pass,
+                balance: 0.00,
+                safeBalance: 0.00,
+                lastSafeInterestDate: '',
+                lastDepositAmount: 0,
+                wagerRequired: 0,
+                wagerDone: 0,
+                totalWagered: 0,
+                claimedBonuses: {},
+                vip: 'VIP0',
+                isBanned: false,
+                createdAt: now,
+                lastLogin: now,
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
+            };
+
+            db.ref('users/' + uid).set(newUser).then(() => {
+                const notifRef = db.ref('users/' + uid + '/notifications').push();
+                notifRef.set({
+                    title: 'স্বাগতম DKWIN প্ল্যাটফর্মে!',
+                    message: 'আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। ডিপোজিট করে খেলা শুরু করুন।',
+                    time: now
+                });
+
+                hideSpinner();
+                currentUser = newUser;
+                localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+                attachUserFirebaseListeners(uid);
+
+                showToast(`অভিনন্দন! রেজিস্ট্রেশন সফল। আপনার UID: ${uid}`);
+                switchToView('view-home');
+            }).catch(err => {
+                hideSpinner();
+                showToast('সার্ভার ত্রুটি: ' + err.message, true);
+            });
+        });
+    }
+
+    function handleUserLogin(e) {
+        e.preventDefault();
+        const identifier = document.getElementById('loginUserField').value.trim();
+        const pass = document.getElementById('loginPassField').value;
+
+        showSpinner('লগইন হচ্ছে...');
+
+        db.ref('users').once('value').then(snapshot => {
+            hideSpinner();
+            let matchedUser = null;
+
+            snapshot.forEach(child => {
+                const u = child.val();
+                if ((u.phone === identifier || u.email === identifier.toLowerCase() || String(u.uid) === identifier) && u.password === pass) {
+                    matchedUser = u;
+                }
+            });
+
+            if (!matchedUser) {
+                showToast('ইউজারনেম অথবা পাসওয়ার্ড ভুল!', true);
+                return;
+            }
+
+            if (matchedUser.isBanned === true) {
+                showToast('অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Ban) রয়েছে!', true);
+                return;
+            }
+
+            const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            db.ref('users/' + matchedUser.uid).update({ lastLogin: now });
+            matchedUser.lastLogin = now;
+
+            currentUser = matchedUser;
+            localStorage.setItem('dk_active_user', JSON.stringify(currentUser));
+            attachUserFirebaseListeners(matchedUser.uid);
+
+            showToast('লগইন সফল হয়েছে!');
+            switchToView('view-home');
+        }).catch(err => {
+            hideSpinner();
+            showToast('ত্রুটি: ' + err.message, true);
+        });
+    }
+
+    function openForgotSequence() {
+        document.getElementById('authLoginForm').style.display = 'none';
+        document.getElementById('authRegisterForm').style.display = 'none';
+        document.getElementById('forgotStepBox').style.display = 'block';
+        document.getElementById('forgotStep1').style.display = 'block';
+        document.getElementById('forgotStep2').style.display = 'none';
+    }
+
+    let forgotVerifiedUser = null;
+    function submitForgotStep1() {
+        const mail = document.getElementById('forgotMailInput').value.trim().toLowerCase();
+        if (!mail) {
+            showToast('ইমেইল দিন!', true);
+            return;
+        }
+
+        showSpinner('যাচাই করা হচ্ছে...');
+        db.ref('users').orderByChild('email').equalTo(mail).once('value', snapshot => {
+            hideSpinner();
+            if (!snapshot.exists()) {
+                showToast('এই ইমেইলের কোনো অ্যাকাউন্ট নেই!', true);
+                return;
+            }
+            snapshot.forEach(c => { forgotVerifiedUser = c.val(); });
+            document.getElementById('forgotStep1').style.display = 'none';
+            document.getElementById('forgotStep2').style.display = 'block';
+        });
+    }
+
+    function submitForgotStep2() {
+        const phone = document.getElementById('forgotPhoneInput').value.trim();
+        const newPass = document.getElementById('forgotNewPassInput').value;
+
+        if (!forgotVerifiedUser || forgotVerifiedUser.phone !== phone) {
+            showToast('রেজিস্টার্ড মোবাইল নাম্বার মিলেনি!', true);
+            return;
+        }
+        if (newPass.length < 6) {
+            showToast('পাসওয়ার্ড কমপক্ষে ৬ সংখ্যার হতে হবে!', true);
+            return;
+        }
+
+        showSpinner('পরিবর্তন করা হচ্ছে...');
+        db.ref('users/' + forgotVerifiedUser.uid).update({ password: newPass }).then(() => {
+            hideSpinner();
+            showToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে! লগইন করুন।');
+            switchAuthMode('login');
+        });
+    }
+
+    function performLogout(force = false) {
+        if (force || confirm('আপনি কি সত্যি লগআউট করতে চান?')) {
+            if (currentUser) {
+                db.ref('users/' + currentUser.uid).off();
+                db.ref('users/' + currentUser.uid + '/deposits').off();
+                db.ref('users/' + currentUser.uid + '/withdrawals').off();
+                db.ref('users/' + currentUser.uid + '/gameHistory').off();
+                db.ref('users/' + currentUser.uid + '/transactions').off();
+            }
+            currentUser = null;
+            localStorage.removeItem('dk_active_user');
+            document.getElementById('bottomNavBar').style.display = 'none';
+            switchToView('view-auth');
+        }
+    }
+
+    /* =======================================================
+       8. BONUS HUB ENGINE
+       ======================================================= */
+    function renderBonusHubUI() {
+        if (!currentUser) return;
+        const totalWagered = parseFloat(currentUser.totalWagered || 0);
+        const claimed = currentUser.claimedBonuses || {};
+
+        document.getElementById('vipTotalWageredDisplay').innerText = totalWagered.toFixed(2);
+
+        [100, 500, 1000, 5000].forEach(tier => {
+            const btn = document.getElementById(`btnFdb${tier}`);
+            if (btn) {
+                if (claimed[`fdb_${tier}`]) {
+                    btn.classList.add('claimed');
+                    btn.innerText = 'Claimed';
+                    btn.disabled = true;
+                } else {
+                    btn.classList.remove('claimed');
+                    btn.innerText = 'ক্লেইম করুন';
+                    btn.disabled = false;
+                }
+            }
+        });
+
+        // VIP 1
+        const v1Target = 5000;
+        const v1Percent = Math.min(100, (totalWagered / v1Target) * 100);
+        document.getElementById('vip1ProgressBar').style.width = v1Percent + '%';
+        document.getElementById('vip1ProgressText').innerText = `৳${Math.min(totalWagered, v1Target).toFixed(0)} / ৳${v1Target}`;
+        const btnV1 = document.getElementById('btnVip1Claim');
+        if (claimed['vip_1']) {
+            btnV1.classList.add('claimed');
+            btnV1.innerText = 'Claimed';
+            btnV1.disabled = true;
+        } else {
+            btnV1.disabled = (totalWagered < v1Target);
+            btnV1.innerText = (totalWagered >= v1Target) ? 'Claim ৳30' : 'Locked';
+        }
+
+        // VIP 2
+        const v2Target = 20000;
+        const v2Percent = Math.min(100, (totalWagered / v2Target) * 100);
+        document.getElementById('vip2ProgressBar').style.width = v2Percent + '%';
+        document.getElementById('vip2ProgressText').innerText = `৳${Math.min(totalWagered, v2Target).toFixed(0)} / ৳${v2Target}`;
+        const btnV2 = document.getElementById('btnVip2Claim');
+        if (claimed['vip_2']) {
+            btnV2.classList.add('claimed');
+            btnV2.innerText = 'Claimed';
+            btnV2.disabled = true;
+        } else {
+            btnV2.disabled = (totalWagered < v2Target);
+            btnV2.innerText = (totalWagered >= v2Target) ? 'Claim ৳300' : 'Locked';
+        }
+
+        // VIP 3
+        const v3Target = 50000;
+        const v3Percent = Math.min(100, (totalWagered / v3Target) * 100);
+        document.getElementById('vip3ProgressBar').style.width = v3Percent + '%';
+        document.getElementById('vip3ProgressText').innerText = `৳${Math.min(totalWagered, v3Target).toFixed(0)} / ৳${v3Target}`;
+        const btnV3 = document.getElementById('btnVip3Claim');
+        if (claimed['vip_3']) {
+            btnV3.classList.add('claimed');
+            btnV3.innerText = 'Claimed';
+            btnV3.disabled = true;
+        } else {
+            btnV3.disabled = (totalWagered < v3Target);
+            btnV3.innerText = (totalWagered >= v3Target) ? 'Claim ৳1,000' : 'Locked';
+        }
+    }
+
+    function claimFirstDepositBonus(reqDep, bonusAmount) {
+        if (!currentUser) return;
+        const claimed = currentUser.claimedBonuses || {};
+        if (claimed[`fdb_${reqDep}`]) {
+            showToast('আপনি ইতিপূর্বে এই বোনাসটি গ্রহণ করেছেন!', true);
+            return;
+        }
+
+        if ((currentUser.lastDepositAmount || 0) < reqDep) {
+            showToast(`এই বোনাস পেতে অন্তত ৳${reqDep} ডিপোজিট করুন!`, true);
+            return;
+        }
+
+        showSpinner('বোনাস যোগ হচ্ছে...');
+        const newBal = parseFloat((currentUser.balance + bonusAmount).toFixed(2));
+        claimed[`fdb_${reqDep}`] = true;
+
+        db.ref('users/' + currentUser.uid).update({
+            balance: newBal,
+            claimedBonuses: claimed
+        }).then(() => {
+            currentUser.balance = newBal;
+            currentUser.claimedBonuses = claimed;
+            refreshAppBalance();
+            renderBonusHubUI();
+            logUniversalTransaction('First Deposit Bonus', `১ম ডিপোজিটে ৳${bonusAmount} বোনাস গ্রহণ`, 'Bonus', +bonusAmount);
+            hideSpinner();
+            showToast(`অভিনন্দন! আপনার ব্যালেন্সে ৳${bonusAmount} বোনাস যোগ হয়েছে।`);
+        }).catch(err => {
+            hideSpinner();
+            showToast('ত্রুটি: ' + err.message, true);
+        });
+    }
+
+    function claimVipBonus(vipTier, reqWager, bonusAmount) {
+        if (!currentUser) return;
+        const claimed = currentUser.claimedBonuses || {};
+        if (claimed[`vip_${vipTier}`]) {
+            showToast('আপনি ইতিপূর্বে এই ভিআইপি রিওয়ার্ড নিয়েছেন!', true);
+            return;
+        }
+
+        if ((currentUser.totalWagered || 0) < reqWager) {
+            showToast(`ভিআইপি ${vipTier} বোনাস পেতে ৳${reqWager} বেটিং কমপ্লিট করুন!`, true);
+            return;
+        }
+
+        showSpinner('ভিআইপি রিওয়ার্ড প্রসেস হচ্ছে...');
+        const newBal = parseFloat((currentUser.balance + bonusAmount).toFixed(2));
+        claimed[`vip_${vipTier}`] = true;
+        const newVip = `VIP${vipTier}`;
+
+        db.ref('users/' + currentUser.uid).update({
+            balance: newBal,
+            claimedBonuses: claimed,
+            vip: newVip
+        }).then(() => {
+            currentUser.balance = newBal;
+            currentUser.claimedBonuses = claimed;
+            currentUser.vip = newVip;
+            refreshAppBalance();
+            renderProfileData();
+            renderBonusHubUI();
+            logUniversalTransaction(`VIP ${vipTier} Reward`, `ভিআইপি ${vipTier} অর্জন করায় ৳${bonusAmount} বোনাস`, 'VIP Bonus', +bonusAmount);
+            hideSpinner();
+            showToast(`অভিনন্দন! আপনি VIP ${vipTier} অর্জন করেছেন এবং ৳${bonusAmount} বোনাস পেয়েছেন!`);
+        }).catch(err => {
+            hideSpinner();
+            showToast('ত্রুটি: ' + err.message, true);
+        });
+    }
+
+    /* =======================================================
+       9. TURNOVER / WAGERING CONTROLLER FOR WITHDRAW
+       ======================================================= */
+    function renderTurnoverStatusUI() {
+        if (!currentUser) return;
+        const lastDep = parseFloat(currentUser.lastDepositAmount || 0);
+        const reqWager = parseFloat(currentUser.wagerRequired || 0);
+        const doneWager = parseFloat(currentUser.wagerDone || 0);
+        const remaining = Math.max(0, reqWager - doneWager);
+
+        document.getElementById('turnoverLastDepVal').innerText = lastDep.toFixed(0);
+        document.getElementById('turnoverTargetVal').innerText = reqWager.toFixed(0);
+        document.getElementById('turnoverDoneVal').innerText = doneWager.toFixed(0);
+        document.getElementById('turnoverRemainingVal').innerText = remaining.toFixed(0);
+
+        const badge = document.getElementById('turnoverBadge');
+        const fill = document.getElementById('turnoverProgressBarFill');
+
+        if (reqWager <= 0 || doneWager >= reqWager) {
+            badge.className = 'status-pill status-approved';
+            badge.innerText = 'কমপ্লিট (উইথড্র যোগ্য)';
+            fill.style.width = '100%';
+        } else {
+            const pct = Math.min(100, (doneWager / reqWager) * 100);
+            badge.className = 'status-pill status-pending';
+            badge.innerText = 'অসম্পূর্ণ';
+            fill.style.width = pct + '%';
+        }
+    }
+
+    /* =======================================================
+       10. SAFE BALANCE BOX (৫% দৈনিক সুদ ও ডুয়েল ব্যালেন্স)
+       ======================================================= */
+    function renderSafeBoxDetailsUI() {
+        if (!currentUser) return;
+        const activeSafeBal = parseFloat(currentUser.safeBalance || 0);
+        const activeMainBal = parseFloat(currentUser.balance || 0);
+
+        document.getElementById('safeboxActiveAmountDisplay').innerText = activeSafeBal.toFixed(2);
+        document.getElementById('safeboxMainWalletBalance').innerText = activeMainBal.toFixed(2);
+        
+        const dailyGain = (activeSafeBal * 0.05);
+        document.getElementById('safeboxDailyGainPreview').innerText = dailyGain.toFixed(2);
+        
+        const claimBtn = document.getElementById('btnClaimToWallet');
+        if (activeSafeBal <= 0) {
+            claimBtn.style.opacity = '0.5';
+            claimBtn.style.pointerEvents = 'none';
+        } else {
+            claimBtn.style.opacity = '1';
+            claimBtn.style.pointerEvents = 'auto';
+        }
+    }
+
+    function calculateSafeBoxLiveInterestPreview() {
+        const inputVal = parseFloat(document.getElementById('safeboxDepositInput').value) || 0;
+        const estimatedDaily = (inputVal * 0.05);
+        document.getElementById('safeboxInputGainPreview').innerText = estimatedDaily.toFixed(2);
+    }
+
+    function handleDepositToSafeBox() {
+        const input = document.getElementById('safeboxDepositInput');
+        const amount = parseFloat(input.value);
+
+        if (isNaN(amount) || amount <= 0) {
+            showToast('সঠিক টাকার পরিমাণ দিন!', true);
+            return;
+        }
+
+        if (!currentUser || currentUser.balance < amount) {
+            showToast('আপনার মূল অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!', true);
+            return;
+        }
+
+        showSpinner('সেফ বক্সে জমা হচ্ছে...');
+        const newMainBal = parseFloat((currentUser.balance - amount).toFixed(2));
+        const newSafeBal = parseFloat(((currentUser.safeBalance || 0) + amount).toFixed(2));
+
+        db.ref('users/' + currentUser.uid).update({
+            balance: newMainBal,
+            safeBalance: newSafeBal
+        }).then(() => {
+            currentUser.balance = newMainBal;
+            currentUser.safeBalance = newSafeBal;
+            refreshAppBalance();
+            renderSafeBoxDetailsUI();
+            logUniversalTransaction('Safe Box Deposit', `সেফ ব্যালেন্স বক্সে জমা`, 'Deposit', -amount);
+            hideSpinner();
+            input.value = '';
+            document.getElementById('safeboxInputGainPreview').innerText = '0.00';
+            showToast(`সফলভাবে সেফ ব্যালেন্স বক্সে ৳${amount} যোগ হয়েছে!`);
+        }).catch(err => {
+            hideSpinner();
+            showToast('ত্রুটি: ' + err.message, true);
+        });
+    }
+
+    function handleClaimSafeBalanceToWallet() {
+        const activeSafeBal = parseFloat(currentUser.safeBalance || 0);
+        if (activeSafeBal <= 0) {
+            showToast('সেফ বক্সে কোনো ব্যালেন্স নেই!', true);
+            return;
+        }
+
+        showSpinner('ওয়ালেটে ট্রান্সফার হচ্ছে...');
+        const newMainBal = parseFloat((currentUser.balance + activeSafeBal).toFixed(2));
+
+        db.ref('users/' + currentUser.uid).update({
+            balance: newMainBal,
+            safeBalance: 0.00
+        }).then(() => {
+            currentUser.balance = newMainBal;
+            currentUser.safeBalance = 0.00;
+            refreshAppBalance();
+            renderSafeBoxDetailsUI();
+            logUniversalTransaction('Safe Box Claim', `সেফ বক্স থেকে ওয়ালেটে ট্রান্সফার`, 'Claim', +activeSafeBal);
+            hideSpinner();
+            showToast(`অভিনন্দন! সেফ বক্সের ৳${activeSafeBal.toFixed(2)} মূল ওয়ালেটে যোগ হয়েছে।`);
+        }).catch(err => {
+            hideSpinner();
+            showToast('ত্রুটি: ' + err.message, true);
+        });
+    }
+
+    function checkAndCreditSafeBoxInterestAutomated() {
+        if (!currentUser || !currentUser.safeBalance || currentUser.safeBalance <= 0) return;
+
+        const now = new Date(getGlobalSyncedTime());
+        const todayStr = now.toISOString().split('T')[0];
+        const currentHour = now.getHours();
+
+        if (currentHour >= 8 && currentUser.lastSafeInterestDate !== todayStr) {
+            const interestAmount = parseFloat((currentUser.safeBalance * 0.05).toFixed(2));
+            const updatedSafeBal = parseFloat((currentUser.safeBalance + interestAmount).toFixed(2));
+
+            db.ref('users/' + currentUser.uid).update({
+                safeBalance: updatedSafeBal,
+                lastSafeInterestDate: todayStr
+            }).then(() => {
+                currentUser.safeBalance = updatedSafeBal;
+                currentUser.lastSafeInterestDate = todayStr;
+                renderSafeBoxDetailsUI();
+                logUniversalTransaction('Daily Safe Interest (5%)', `সেফ ব্যালেন্স বক্সের ৫% দৈনিক সুদ`, 'Interest', +interestAmount);
+
+                const notifRef = db.ref('users/' + currentUser.uid + '/notifications').push();
+                notifRef.set({
+                    title: 'সেফ বক্সের সুদ যোগ হয়েছে!',
+                    message: `সকাল ৮:০০ টার দৈনিক ৫% সুদ হিসেবে আপনার সেফ বক্সে +৳${interestAmount} যোগ হয়েছে।`,
+                    time: now.toISOString().replace('T', ' ').substring(0, 19)
+                });
+            });
+        }
+    }
+
+    /* =======================================================
+       11. DEPOSIT & WITHDRAWAL ENGINE
+       ======================================================= */
+    function updateDepositUI() {
+        document.getElementById('depMethodName').innerText = activeDepMethod;
+        document.getElementById('adminWalletNum').innerText = adminWallets[activeDepMethod] || '01712345678';
+    }
+
+    function pickDepositMethod(method, card) {
+        activeDepMethod = method;
+        document.querySelectorAll('#view-deposit .method-choice-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        updateDepositUI();
+    }
+
+    function pickWithdrawMethod(method, card) {
+        activeWithMethod = method;
+        document.querySelectorAll('#view-withdraw .method-choice-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+    }
+
+    function submitDepositForm() {
+        const amountInput = document.getElementById('depAmountBox');
+        const trxInput = document.getElementById('depTrxBox');
+
+        if (!amountInput || !trxInput) return;
+
+        const amount = parseFloat(amountInput.value);
+        const trx = trxInput.value.trim();
+        const minDep = (appLimits && appLimits.minDeposit) ? parseFloat(appLimits.minDeposit) : 100;
+        const maxDep = (appLimits && appLimits.maxDeposit) ? parseFloat(appLimits.maxDeposit) : 50000;
+
+        if (isNaN(amount) || amount < minDep) {
+            showToast(`ডিপোজিট পরিমাণ সর্বনিম্ন ৳${minDep} হতে হবে!`, true);
+            return;
+        }
+        if (amount > maxDep) {
+            showToast(`ডিপোজিট পরিমাণ সর্বোচ্চ ৳${maxDep} হতে পারে!`, true);
+            return;
+        }
+        if (!trx || trx.length < 4) {
+            showToast('সঠিক TrxID প্রদান করুন (কমপক্ষে ৪ অক্ষর)!', true);
+            return;
+        }
+
+        if (!currentUser || !currentUser.uid) {
+            showToast('ইউজার লগইন নিশ্চিত করুন!', true);
+            return;
+        }
+
+        showSpinner('ডিপোজিট সাবমিট হচ্ছে...');
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const currentTimeStamp = Date.now();
+
+        const newDepKey = db.ref().child('deposits').push().key;
+
+        const depositData = {
+            id: String(newDepKey),
+            uid: String(currentUser.uid),
+            username: String(currentUser.username || ('MEMBER' + currentUser.uid)),
+            amount: Number(amount),
+            method: String(activeDepMethod || 'bKash'),
+            trx: String(trx),
+            status: 'Pending',
+            time: String(now),
+            timestamp: currentTimeStamp
+        };
+
+        const updates = {};
+        updates['/deposits/' + newDepKey] = depositData;
+        updates['/users/' + currentUser.uid + '/deposits/' + newDepKey] = depositData;
+
+        updates['/users/' + currentUser.uid + '/lastDepositAmount'] = amount;
+        updates['/users/' + currentUser.uid + '/wagerRequired'] = amount;
+        updates['/users/' + currentUser.uid + '/wagerDone'] = 0;
+
+        db.ref().update(updates).then(() => {
+            currentUser.lastDepositAmount = amount;
+            currentUser.wagerRequired = amount;
+            currentUser.wagerDone = 0;
+
+            logUniversalTransaction('Deposit Submitted', `৳${amount} via ${activeDepMethod} (TrxID: ${trx})`, 'Pending', +amount);
+
+            hideSpinner();
+            showToast('ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে!');
+            trxInput.value = '';
+            switchToView('view-deposit-history');
+        }).catch(err => {
+            hideSpinner();
+            showToast('সার্ভার এরর: ' + err.message, true);
+        });
+    }
+
+    function submitWithdrawForm() {
+        const amountInput = document.getElementById('withAmountBox');
+        const phoneInput = document.getElementById('withPhoneBox');
+
+        if (!amountInput || !phoneInput) return;
+
+        const amount = parseFloat(amountInput.value);
+        let phone = phoneInput.value.trim().replace(/[^0-9]/g, '');
+        const minWith = (appLimits && appLimits.minWithdraw) ? parseFloat(appLimits.minWithdraw) : 100;
+        const maxWith = (appLimits && appLimits.maxWithdraw) ? parseFloat(appLimits.maxWithdraw) : 25000;
+
+        if (isNaN(amount) || amount < minWith) {
+            showToast(`উইথড্র পরিমাণ সর্বনিম্ন ৳${minWith} হতে হবে!`, true);
+            return;
+        }
+        if (amount > maxWith) {
+            showToast(`একবারে সর্বোচ্চ উইথড্র ৳${maxWith} পর্যন্ত করা যাবে!`, true);
+            return;
+        }
+        if (!currentUser || currentUser.balance < amount) {
+            showToast('আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই!', true);
+            return;
+        }
+        if (!phone || phone.length < 11) {
+            showToast('সঠিক ১১ ডিজিটের মোবাইল ওয়ালেট নাম্বার দিন!', true);
+            return;
+        }
+
+        const reqWager = parseFloat(currentUser.wagerRequired || 0);
+        const doneWager = parseFloat(currentUser.wagerDone || 0);
+        if (reqWager > 0 && doneWager < reqWager) {
+            const remain = (reqWager - doneWager).toFixed(0);
+            showToast(`উইথড্র করতে হলে লাস্ট ডিপোজিটের ১০০% বেটিং কমপ্লিট করুন! বাকি আছে: ৳${remain}`, true);
+            return;
+        }
+
+        showSpinner('উইথড্র রিকোয়েস্ট পাঠানো হচ্ছে...');
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const currentTimeStamp = Date.now();
+        const newBal = parseFloat((currentUser.balance - amount).toFixed(2));
+
+        const newWithKey = db.ref().child('withdrawals').push().key;
+
+        const withData = {
+            id: String(newWithKey),
+            uid: String(currentUser.uid),
+            username: String(currentUser.username || ('MEMBER' + currentUser.uid)),
+            amount: Number(amount),
+            method: String(activeWithMethod || 'bKash'),
+            phone: String(phone),
+            status: 'Pending',
+            time: String(now),
+            timestamp: currentTimeStamp
+        };
+
+        const updates = {};
+        updates['/users/' + currentUser.uid + '/balance'] = newBal;
+        updates['/withdrawals/' + newWithKey] = withData;
+        updates['/users/' + currentUser.uid + '/withdrawals/' + newWithKey] = withData;
+
+        db.ref().update(updates).then(() => {
+            currentUser.balance = newBal;
+            refreshAppBalance();
+            logUniversalTransaction('Withdraw Request', `৳${amount} to ${activeWithMethod} (${phone})`, 'Pending', -amount);
+
+            hideSpinner();
+            showToast('উইথড্র রিকোয়েস্ট সফল হয়েছে!');
+            amountInput.value = '';
+            phoneInput.value = '';
+            switchToView('view-withdraw-history');
+        }).catch(err => {
+            hideSpinner();
+            showToast('উইথড্র পাঠাতে ত্রুটি: ' + err.message, true);
+        });
+    }
+
+    function logUniversalTransaction(type, detail, status, amountChange = 0) {
+        if (!currentUser) return;
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const ref = db.ref('users/' + currentUser.uid + '/transactions').push();
+        ref.set({
+            id: ref.key,
+            type: String(type),
+            detail: String(detail),
+            status: String(status),
+            amount: Number(amountChange),
+            time: String(now),
+            timestamp: Date.now()
+        });
+    }
+
+    /* =======================================================
+       12. HISTORIES & VOUCHERS
+       ======================================================= */
+    function loadDepositHistory() {
+        const c = document.getElementById('depositHistoryContent');
+        if (!currentUser) return;
+        c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">লোড হচ্ছে...</p>';
+
+        const depRef = db.ref('users/' + currentUser.uid + '/deposits');
+        depRef.off();
+
+        depRef.on('value', snap => {
+            if (!snap.exists()) {
+                c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">কোনো ডিপোজিট রেকর্ড নেই।</p>';
+                return;
+            }
+
+            const list = [];
+            snap.forEach(child => {
+                const val = child.val();
+                if (val && typeof val === 'object') {
+                    list.push({
+                        id: val.id || child.key,
+                        amount: val.amount || 0,
+                        method: val.method || 'bKash',
+                        trx: val.trx || 'N/A',
+                        status: val.status || 'Pending',
+                        time: val.time || '',
+                        timestamp: val.timestamp || (val.time ? new Date(val.time).getTime() : 0)
+                    });
+                }
+            });
+
+            if (list.length === 0) {
+                c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">কোনো ডিপোজিট রেকর্ড নেই।</p>';
+                return;
+            }
+
+            list.sort((a, b) => (b.timestamp - a.timestamp));
+
+            c.innerHTML = '';
+            list.forEach(d => {
+                const st = String(d.status || 'Pending');
+                const stLower = st.toLowerCase();
+                let badgeClass = 'status-pending';
+                if (stLower === 'approved' || stLower === 'success') badgeClass = 'status-approved';
+                else if (stLower === 'rejected' || stLower === 'failed') badgeClass = 'status-rejected';
+
+                c.innerHTML += `
+                    <div class="history-card-box">
+                        <div class="history-card-header">
+                            <strong style="font-size:12px; color:#444;">ID: ${d.id}</strong>
+                            <span class="status-pill ${badgeClass}">${st}</span>
+                        </div>
+                        <div class="history-card-row"><span>মাধ্যম:</span> <strong>${d.method}</strong></div>
+                        <div class="history-card-row"><span>পরিমাণ:</span> <strong style="color:var(--green-dark);">৳${d.amount}</strong></div>
+                        <div class="history-card-row"><span>TrxID:</span> <code style="background:#f1f2f6; padding:2px 6px; border-radius:4px; font-weight:700;">${d.trx}</code></div>
+                        <div class="history-card-row"><span>তারিখ ও সময়:</span> <span>${d.time}</span></div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    function loadWithdrawHistory() {
+        const c = document.getElementById('withdrawHistoryContent');
+        if (!currentUser) return;
+        c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">লোড হচ্ছে...</p>';
+
+        const withRef = db.ref('users/' + currentUser.uid + '/withdrawals');
+        withRef.off();
+
+        withRef.on('value', snap => {
+            if (!snap.exists()) {
+                c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">কোনো উইথড্র রেকর্ড নেই।</p>';
+                return;
+            }
+
+            const list = [];
+            snap.forEach(child => {
+                const val = child.val();
+                if (val && typeof val === 'object') {
+                    list.push({
+                        id: val.id || child.key,
+                        amount: val.amount || 0,
+                        method: val.method || 'bKash',
+                        phone: val.phone || 'N/A',
+                        status: val.status || 'Pending',
+                        time: val.time || '',
+                        timestamp: val.timestamp || (val.time ? new Date(val.time).getTime() : 0)
+                    });
+                }
+            });
+
+            if (list.length === 0) {
+                c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">কোনো উইথড্র রেকর্ড নেই।</p>';
+                return;
+            }
+
+            list.sort((a, b) => (b.timestamp - a.timestamp));
+
+            c.innerHTML = '';
+            list.forEach(w => {
+                const st = String(w.status || 'Pending');
+                const stLower = st.toLowerCase();
+                let badgeClass = 'status-pending';
+                if (stLower === 'approved' || stLower === 'success') badgeClass = 'status-approved';
+                else if (stLower === 'rejected' || stLower === 'failed') badgeClass = 'status-rejected';
+
+                c.innerHTML += `
+                    <div class="history-card-box">
+                        <div class="history-card-header">
+                            <strong style="font-size:12px; color:#444;">ID: ${w.id}</strong>
+                            <span class="status-pill ${badgeClass}">${st}</span>
+                        </div>
+                        <div class="history-card-row"><span>মাধ্যম:</span> <strong>${w.method}</strong></div>
+                        <div class="history-card-row"><span>পরিমাণ:</span> <strong style="color:var(--red);">৳${w.amount}</strong></div>
+                        <div class="history-card-row"><span>নাম্বার:</span> <strong>${w.phone}</strong></div>
+                        <div class="history-card-row"><span>তারিখ ও সময়:</span> <span>${w.time}</span></div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    function loadTransactions() {
+        const c = document.getElementById('transactionsContent');
+        if (!currentUser) return;
+        c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">লোড হচ্ছে...</p>';
+
+        const txRef = db.ref('users/' + currentUser.uid + '/transactions');
+        txRef.off();
+
+        txRef.on('value', snap => {
+            if (!snap.exists()) {
+                c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">কোনো লেনদেন রেকর্ড নেই।</p>';
+                return;
+            }
+            c.innerHTML = '';
+            const list = [];
+            snap.forEach(x => {
+                const val = x.val();
+                if (val && typeof val === 'object') list.push(val);
+            });
+
+            list.sort((a, b) => ((b.timestamp || 0) - (a.timestamp || 0)));
+
+            list.forEach(t => {
+                const amt = Number(t.amount || 0);
+                let amtColor = '#222';
+                let amtSign = '';
+                if (amt > 0) { amtColor = '#2ecc71'; amtSign = '+৳'; }
+                else if (amt < 0) { amtColor = '#e74c3c'; amtSign = '-৳'; }
+
+                c.innerHTML += `
+                    <div class="history-card-box">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong>${t.type}</strong>
+                            <span style="font-size:14px; font-weight:800; color:${amtColor};">${amt !== 0 ? amtSign + Math.abs(amt) : t.status}</span>
+                        </div>
+                        <div style="font-size:12px; color:#555; margin-top:5px;">${t.detail}</div>
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa; margin-top:6px;">
+                            <span>স্ট্যাটাস: ${t.status}</span>
+                            <span>${t.time}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    function loadGameHistory() {
+        const c = document.getElementById('gameHistoryContent');
+        if (!currentUser) return;
+        c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">লোড হচ্ছে...</p>';
+
+        const gRef = db.ref('users/' + currentUser.uid + '/gameHistory');
+        gRef.off();
+
+        gRef.on('value', snap => {
+            if (!snap.exists()) {
+                c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">কোনো বেট হিস্টোরি নেই।</p>';
+                return;
+            }
+            c.innerHTML = '';
+            const list = [];
+            snap.forEach(x => {
+                const val = x.val();
+                if (val && typeof val === 'object') list.push(val);
+            });
+
+            list.sort((a, b) => ((b.timestamp || 0) - (a.timestamp || 0)));
+
+            list.forEach(g => {
+                c.innerHTML += `
+                    <div class="history-card-box">
+                        <div class="history-card-header">
+                            <div>
+                                <strong style="color:#f39c12; font-size:12px;"><i class="fa-solid fa-gamepad"></i> ${g.game || 'Aviator'}</strong>
+                                <span style="font-size:11px; color:#888; margin-left:6px;">(${g.roundCode || 'Round'})</span>
+                            </div>
+                            <span class="status-pill ${g.win ? 'status-approved' : 'status-rejected'}">${g.win ? 'WIN (' + (g.mult || '1x') + ')' : 'LOST'}</span>
+                        </div>
+                        <div class="history-card-row"><span>বেট পরিমাণ:</span> <strong>৳${g.bet}</strong></div>
+                        <div class="history-card-row"><span>রিটার্ন / লাভ:</span> <strong style="color:${g.win ? '#27ae60' : '#e74c3c'};">৳${g.payout}</strong></div>
+                        <div class="history-card-row"><span>তারিখ ও সময়:</span> <span>${g.time}</span></div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    function loadNotifications() {
+        const c = document.getElementById('notificationsContent');
+        c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">লোড হচ্ছে...</p>';
+
+        db.ref('users/' + currentUser.uid + '/notifications').once('value', snap => {
+            if (!snap.exists()) {
+                c.innerHTML = '<p style="text-align:center; color:#888; padding:30px;">কোনো বিজ্ঞপ্তি নেই।</p>';
+                return;
+            }
+            c.innerHTML = '';
+            snap.forEach(x => {
+                const n = x.val();
+                c.innerHTML += `
+                    <div class="history-card-box">
+                        <strong style="font-size:13px; color:#e67e22;"><i class="fa-solid fa-bell"></i> ${n.title}</strong>
+                        <p style="font-size:12px; color:#555; margin-top:4px;">${n.message}</p>
+                        <div style="font-size:10px; color:#aaa; margin-top:6px;">${n.time}</div>
+                    </div>
+                `;
+            });
+        });
+    }
+
+    function redeemVoucherAction() {
+        const code = document.getElementById('giftVoucherInput').value.trim().toUpperCase();
+        if (!code) {
+            showToast('ভাউচার কোড লিখুন!', true);
+            return;
+        }
+
+        showSpinner('ভাউচার যাচাই হচ্ছে...');
+
+        db.ref('giftCodes/' + code).once('value', snap => {
+            if (!snap.exists()) {
+                hideSpinner();
+                showToast('ভুল বা মেয়াদোত্তীর্ণ কোড!', true);
+                return;
+            }
+
+            const gift = snap.val();
+            if (gift.claimedBy && gift.claimedBy[currentUser.uid]) {
+                hideSpinner();
+                showToast('আপনি ইতিপূর্বে এই কোডটি রিডিম করেছেন!', true);
+                return;
+            }
+
+            const addAmount = parseFloat(gift.amount);
+            const newBal = parseFloat((currentUser.balance + addAmount).toFixed(2));
+
+            db.ref('giftCodes/' + code + '/claimedBy/' + currentUser.uid).set(true);
+            db.ref('users/' + currentUser.uid).update({ balance: newBal }).then(() => {
+                currentUser.balance = newBal;
+                refreshAppBalance();
+                hideSpinner();
+
+                logUniversalTransaction('Gift Voucher', `ভাউচার ${code} রিডিম সফল`, 'Success', +addAmount);
+                showToast(`অভিনন্দন! আপনার ব্যালেন্সে ৳${addAmount} যোগ হয়েছে।`);
+                document.getElementById('giftVoucherInput').value = '';
+                switchToView('view-profile');
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
